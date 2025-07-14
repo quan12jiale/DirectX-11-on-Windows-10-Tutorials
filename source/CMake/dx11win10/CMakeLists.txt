@@ -53,6 +53,8 @@ endif()
 ##设置预处理器定义
 target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE UNICODE QT_DLL QT_NO_DEBUG NDEBUG QT_CORE_LIB QT_GUI_LIB QT_WIDGETS_LIB) # WIN32
 
+set(__QT_DEPLOY_TOOL "D:/Program/qt6/bin/windeployqt.exe")
+
 # 设置一个变量
 set(ENABLE_VLD FALSE) # TRUE FALSE
 
@@ -71,6 +73,22 @@ else()
     set(VLD_LIB_PATH "")
 endif()
 
+if(ENABLE_QRHI)
+    ##配置库依赖
+    find_package(Qt6 COMPONENTS Core Gui GuiPrivate REQUIRED)
+    add_custom_command( #设置生成事件>>生成后事件 参考cmake\linux\helpers.cmake。拷贝Resources文件夹;调用windeployqt部署qt的dll
+      TARGET ${LIBRARY_TARGET_NAME}
+      POST_BUILD
+      COMMAND
+        "${__QT_DEPLOY_TOOL}" "${LIBRARY_TARGET_NAME}.exe" WORKING_DIRECTORY
+        "${PROJECT_SOURCE_DIR}/../build/bin/${PROJECT_PLATFORM}/$<CONFIG>"
+      COMMENT "Copy ${LIBRARY_TARGET_NAME} to binary directory"
+      VERBATIM
+    )
+else()
+endif()
+
+
 ##配置构建/使用时的头文件路径
 target_include_directories(
     ${LIBRARY_TARGET_NAME}
@@ -79,8 +97,6 @@ target_include_directories(
     ${VLD_INCLUDE_PATH}
 )
 
-##配置库依赖
-#find_package(Qt5 COMPONENTS Core Gui Widgets PrintSupport REQUIRED)
 target_link_libraries(${LIBRARY_TARGET_NAME}
     PRIVATE 
         d3d11
@@ -88,4 +104,5 @@ target_link_libraries(${LIBRARY_TARGET_NAME}
         dxguid
         #d3d12
     ${VLD_LIB_PATH}
+    Qt::Core Qt::Gui Qt::GuiPrivate
 )

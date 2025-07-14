@@ -2,7 +2,7 @@
 // Filename: applicationclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "applicationclass.h"
-
+#include "qd3dclass.h"
 
 ApplicationClass::ApplicationClass()
 {

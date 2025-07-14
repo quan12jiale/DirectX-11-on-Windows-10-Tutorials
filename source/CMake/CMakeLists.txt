@@ -1,7 +1,7 @@
-##����CMake�汾
+##配置CMake版本
 cmake_minimum_required(VERSION 3.13)
 
-##������Ŀ����/����/�汾
+##配置项目名称/语言/版本
 project(dx11win10
     LANGUAGES CXX C
     VERSION 1.0
@@ -18,7 +18,7 @@ else()
 	MESSAGE(FATAL_ERROR "Has not support your system:${CMAKE_SYSTEM_NAME}...")
 endif()
 
-##Linux���ּܹ�
+##Linux区分架构
 if(${ISLINUX})
     if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64")
         add_definitions("-D__X86_64__")
@@ -31,13 +31,18 @@ if(${ISLINUX})
     endif()
 endif()
 
-##���ù�������
+##配置构建类型
 if(${ISLINUX})
     set(CMAKE_CONFIGURATION_TYPES Debug Release ReleaseDebug)
 endif()
 
-set(QT_PREFIX_PATH $ENV{QTDIR64}) # QTDIR64
-message("QT install path: $ENV{QTDIR64}") # QTDIR64
+# 设置一个变量
+set(ENABLE_QRHI TRUE) # TRUE FALSE
+set(QT_PREFIX_PATH $ENV{QT6DIR64}) # QTDIR64
+message("QT install path: $ENV{QT6DIR64}") # QTDIR64
+
+# 禁用cmakes时Qt私有模块警告，见QtPublicDependencyHelpers.cmake
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
 if(${ISWINDOWS})
 	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -54,16 +59,21 @@ else()
     set(PROJECT_PLATFORM_X "X64")
 endif()
 
-#list(APPEND CMAKE_PREFIX_PATH ${QT_PREFIX_PATH})
+if(ENABLE_QRHI)
+    message(STATUS "defined ENABLE_QRHI")
+    # 添加宏定义
+    add_definitions(-DENABLE_QRHI)
+    list(APPEND CMAKE_PREFIX_PATH ${QT_PREFIX_PATH})
+endif()
 
-##Դ����λ��
+##源代码位置
 set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
 
-##ȫ������(���б��롢������������չ�����رվ��桢����comdat�۵�,Release�汾����PDB)
+##全局配置(并行编译、设置内联函数展开、关闭警告、启用comdat折叠,Release版本生成PDB)
 if(MSVC)
-    # C/C++ >> ����ѡ�� >> ���ض��ľ�����Ϊ����
-    # warning C4239: ʹ���˷Ǳ�׼��չ �ǳ�������ֻ�ܰ󶨵���ֵ
-    # warning C4211: ʹ���˷Ǳ�׼��չ: ����extern�����¶���Ϊ��static��
+    # C/C++ >> 所有选项 >> 将特定的警告视为错误
+    # warning C4239: 使用了非标准扩展 非常量引用只能绑定到左值
+    # warning C4211: 使用了非标准扩展: 将“extern”重新定义为“static”
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Ob2 /W0 /we4239 /we4211")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}") # /OPT:REF /OPT:ICF
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
@@ -76,7 +86,7 @@ else()
     add_compile_options(-Wno-narrowing)
 endif()
 
-##��ֹRelWithDebInfo���Ż����򿪾���
+##禁止RelWithDebInfo的优化，打开警告
 option(BUILD_DEVELOPER "Build for developer" ON)
 if(MSVC AND BUILD_DEVELOPER)
     STRING(REPLACE "/O2" "/Od" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}) 
@@ -84,10 +94,10 @@ if(MSVC AND BUILD_DEVELOPER)
 endif()
 
 if(${ISLINUX})
-    ##Release�汾����������չ��ΪĬ��ֵ
+    ##Release版本内联函数扩展改为默认值
     STRING(REPLACE "/Ob1" "" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    ##����ReleaseDebug�汾
+    ##配置ReleaseDebug版本
     set(CMAKE_C_FLAGS_RELEASEDEBUG ${CMAKE_C_FLAGS_RELWITHDEBINFO})
     set(CMAKE_CXX_FLAGS_RELEASEDEBUG ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
     SET(CMAKE_EXE_LINKER_FLAGS_RELEASEDEBUG ${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO})
@@ -97,11 +107,11 @@ if(${ISLINUX})
     STRING(REPLACE "-O2" "" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
     STRING(REPLACE "/Ob1" "" CMAKE_CXX_FLAGS_RELEASEDEBUG ${CMAKE_CXX_FLAGS_RELEASEDEBUG})
 
-    #�����Ż�����
+    #降低优化级别
     STRING(REPLACE "-O3" "-O1" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
     STRING(REPLACE "-O3" "-O1" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
-    ##����Debug�汾���ļ���β��
+    ##设置Debug版本的文件结尾符
     set(CMAKE_DEBUG_POSTFIX d)
 
     set(CMAKE_SKIP_RPATH OFF)
@@ -109,13 +119,13 @@ if(${ISLINUX})
     set(CMAKE_BUILD_RPATH "\$ORIGIN")
 endif()
 
-##���� lib·��
+##添加 lib路径
 link_directories("${PROJECT_SOURCE_DIR}/../build/lib/${PROJECT_PLATFORM}/$<CONFIG>") # $(Configuration)
 
-##����VS��������ʹ��"�ļ���"��֯�ṹ
+##控制VS工程生成使用"文件夹"组织结构
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-##����̬��\��̬�����·����λ���ض�·��,������ʱʹ��(���������Ŀ�ֲ��ڸ����ļ���)
+##将动态库\静态库输出路径定位到特定路径,供调试时使用(否则依赖的库分布在各个文件夹)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}../build/bin/${PROJECT_PLATFORM}/$<CONFIG>")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}../build/lib/${PROJECT_PLATFORM}/$<CONFIG>")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}../build/lib/${PROJECT_PLATFORM}/$<CONFIG>")
@@ -123,14 +133,13 @@ if(${ISLINUX})
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../build/bin/${PROJECT_PLATFORM}/$<CONFIG>")
 endif()
 
-
-# �����İ���Ҫ��ǰ��
-#find_package(Qt5Core REQUIRED )
-#find_package(Qt5Gui REQUIRED )
-#find_package(Qt5Widgets REQUIRED )
-
+if(ENABLE_QRHI)
+    # 依赖的包，要提前找
+    find_package(Qt6Core REQUIRED )
+    find_package(Qt6Gui REQUIRED )
+endif()
 
 add_subdirectory(dx11win10)
 
-# ����������
+# 设置启动项
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT dx11win10)
