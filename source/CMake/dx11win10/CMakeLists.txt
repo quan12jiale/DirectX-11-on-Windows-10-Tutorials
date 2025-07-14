@@ -81,7 +81,11 @@ target_include_directories(
 
 ##配置库依赖
 #find_package(Qt5 COMPONENTS Core Gui Widgets PrintSupport REQUIRED)
-#target_link_libraries(${LIBRARY_TARGET_NAME}
-#    PRIVATE Qt5::Core Qt5::Gui Qt5::Widgets Qt5::PrintSupport
-#    ${VLD_LIB_PATH}
-#)
+target_link_libraries(${LIBRARY_TARGET_NAME}
+    PRIVATE 
+        d3d11
+        dxgi
+        dxguid
+        #d3d12
+    ${VLD_LIB_PATH}
+)
