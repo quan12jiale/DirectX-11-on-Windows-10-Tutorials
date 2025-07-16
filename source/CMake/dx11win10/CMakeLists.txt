@@ -82,6 +82,9 @@ if(ENABLE_QRHI)
       COMMAND
         "${__QT_DEPLOY_TOOL}" "${LIBRARY_TARGET_NAME}.exe" WORKING_DIRECTORY
         "${PROJECT_SOURCE_DIR}/../build/bin/${PROJECT_PLATFORM}/$<CONFIG>"
+      COMMAND
+        "${CMAKE_COMMAND}" -E copy_directory "${PROJECT_SOURCE_DIR}/Engine"
+        "${PROJECT_SOURCE_DIR}/../build/bin/${PROJECT_PLATFORM}/$<CONFIG>/../Engine"
       COMMENT "Copy ${LIBRARY_TARGET_NAME} to binary directory"
       VERBATIM
     )
@@ -101,6 +104,7 @@ target_link_libraries(${LIBRARY_TARGET_NAME}
     PRIVATE 
         d3d11
         dxgi
+        d3dcompiler
         dxguid
         #d3d12
     ${VLD_LIB_PATH}

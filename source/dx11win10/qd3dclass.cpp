@@ -14,6 +14,12 @@ bool QD3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND h
 {
 	QRhiHelper::InitParams initParams;
 	initParams.backend = QRhi::D3D11;
+	if (vsync) {
+
+	}
+	else {
+		initParams.swapChainFlags |= QRhiSwapChain::Flag::NoVSync;
+	}
 	mInitParams = initParams;
 
 	m_window = QWindow::fromWinId(reinterpret_cast<WId>(hwnd));
