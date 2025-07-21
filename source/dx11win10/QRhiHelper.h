@@ -39,6 +39,9 @@ struct QENGINECORE_API QRhiHelper {
 
 	static QSharedPointer<QRhi> create(QRhi::Implementation inBackend = QRhi::Vulkan, QRhi::Flags inFlags = QRhi::Flag(), QWindow* inWindow = nullptr);
 
+	static QShader newShaderFromCode(QShader::Stage stage, QByteArray code, const QByteArray& preamble = QByteArray());
+	static QShader newShaderFromHlslFile(QShader::Stage stage, const QString& pFileName, const QByteArray& preamble = QByteArray());
+
 	static QShader newShaderFromQSBFile(const char* filename);
 
 	//static QRhiBuffer* newVkBuffer(QRhi* rhi, QRhiBuffer::Type type, VkBufferUsageFlags flags, int size);

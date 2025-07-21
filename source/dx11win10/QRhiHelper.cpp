@@ -6,6 +6,8 @@
 #include <QOffscreenSurface>
 #endif
 
+#include "rhi/qshaderbaker.h"
+
 //#include "Vulkan/QRhiVulkanExHelper.h"
 //#include "tracy/Tracy.hpp"
 
@@ -93,6 +95,57 @@ QSharedPointer<QRhi> QRhiHelper::create(QRhi::Implementation inBackend, QRhi::Fl
 	}
 #endif
 	return rhi;
+}
+
+QShader QRhiHelper::newShaderFromCode(QShader::Stage stage, QByteArray code, const QByteArray& preamble)
+{
+	//ZoneScopedN("CompileShader");
+	QShaderBaker baker;
+	baker.setGeneratedShaderVariants({ QShader::StandardShader });
+	baker.setSourceString(code, stage);
+	baker.setPreamble(preamble);
+
+	QList<QShaderBaker::GeneratedShader> generatedShaders;
+	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::SpirvShader,QShaderVersion(100) };
+	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::GlslShader,QShaderVersion(450) };
+	generatedShaders << QShaderBaker::GeneratedShader{ QShader::Source::MslShader,QShaderVersion(20) };
+	baker.setGeneratedShaders(generatedShaders);
+
+	QShaderBaker hlslBaker;
+	hlslBaker.setGeneratedShaderVariants({ QShader::StandardShader });
+	hlslBaker.setPreamble(preamble);
+	hlslBaker.setGeneratedShaders({ QShaderBaker::GeneratedShader(QShader::Source::HlslShader,QShaderVersion(50)) });
+	code = QString(code).replace("imageCube", "image2DArray").toLocal8Bit();
+	hlslBaker.setSourceString(code, stage);
+
+	QShader shader = baker.bake();
+	QShader hlslShader = hlslBaker.bake();
+	if (!shader.isValid()) {
+		QStringList codelist = QString(code).split('\n');
+		for (int i = 0; i < codelist.size(); i++) {
+			qWarning() << i + 1 << codelist[i].toLocal8Bit().data();
+		}
+		qWarning(baker.errorMessage().toLocal8Bit());
+	}
+	else if (!hlslShader.isValid()) {
+		QStringList codelist = QString(code).split('\n');
+		for (int i = 0; i < codelist.size(); i++) {
+			qWarning() << i + 1 << codelist[i].toLocal8Bit().data();
+		}
+		qWarning(hlslBaker.errorMessage().toLocal8Bit());
+	}
+	//shader.setDescription(hlslShader.description());
+	shader.setResourceBindingMap(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50)), hlslShader.nativeResourceBindingMap(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50))));
+	shader.setShader(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50)), hlslShader.shader(QShaderKey(QShader::Source::HlslShader, QShaderVersion(50))));
+	return shader;
+}
+
+QShader QRhiHelper::newShaderFromHlslFile(QShader::Stage stage, const QString& pFileName, const QByteArray& preamble)
+{
+	QFile f(pFileName);
+	if (f.open(QIODevice::ReadOnly))
+		return QRhiHelper::newShaderFromCode(stage,f.readAll(), preamble);
+	return QShader();
 }
 
 QShader QRhiHelper::newShaderFromQSBFile(const char* filename)

@@ -75,7 +75,7 @@ endif()
 
 if(ENABLE_QRHI)
     ##配置库依赖
-    find_package(Qt6 COMPONENTS Core Gui GuiPrivate REQUIRED)
+    find_package(Qt6 COMPONENTS Core Gui GuiPrivate ShaderTools ShaderToolsPrivate REQUIRED)
     add_custom_command( #设置生成事件>>生成后事件 参考cmake\linux\helpers.cmake。拷贝Resources文件夹;调用windeployqt部署qt的dll
       TARGET ${LIBRARY_TARGET_NAME}
       POST_BUILD
@@ -108,5 +108,5 @@ target_link_libraries(${LIBRARY_TARGET_NAME}
         dxguid
         #d3d12
     ${VLD_LIB_PATH}
-    Qt::Core Qt::Gui Qt::GuiPrivate
+    Qt::Core Qt::Gui Qt::GuiPrivate Qt::ShaderTools Qt::ShaderToolsPrivate
 )
