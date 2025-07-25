@@ -51,7 +51,7 @@ endif()
 #set_target_properties(${LIBRARY_TARGET_NAME} PROPERTIES AUTOMOC ON)
 
 ##设置预处理器定义
-target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE UNICODE QT_DLL QT_NO_DEBUG NDEBUG QT_CORE_LIB QT_GUI_LIB QT_WIDGETS_LIB) # WIN32
+target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE UNICODE QT_DLL QT_CORE_LIB QT_GUI_LIB QT_WIDGETS_LIB) # WIN32 QT_NO_DEBUG NDEBUG
 
 set(__QT_DEPLOY_TOOL "D:/Program/qt6/bin/windeployqt.exe")
 

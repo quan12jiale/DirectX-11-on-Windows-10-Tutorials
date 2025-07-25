@@ -26,11 +26,40 @@ private:
 	QMatrix4x4 view;
 	QMatrix4x4 projection;
 public:
+	struct TargaHeader
+	{
+		unsigned char data1[12];
+		unsigned short width;
+		unsigned short height;
+		unsigned char bpp;
+		unsigned char data2;
+
+		friend QDataStream& operator<<(QDataStream& out, const TargaHeader& header);
+		friend QDataStream& operator>>(QDataStream& in, TargaHeader& header);
+	};
+public:
 	MyRhiWindow(QRhiHelper::InitParams inInitParams);
+	~MyRhiWindow();
 private:
 	void InitializeData();
 	void InitializeMatrix();
 	bool InitializeBuffers();
+private:
+	void InitializeTextureVertexIndexData();
+	bool InitializeTexture();
+	void RenderTexture();
+	bool LoadTarga32Bit(const char* filename);
+	unsigned char* m_targaData = nullptr;
+	int m_width, m_height;
+	struct TextureVertexType
+	{
+		XMFLOAT4 position;
+		XMFLOAT2 texture;
+	};
+	QVector<TextureVertexType> m_textureVertexData;
+	QImage mImage;
+	QScopedPointer<QRhiTexture> mTexture;
+	QScopedPointer<QRhiSampler> mSampler;
 protected:
 	void onRenderTick() override;
 };
