@@ -28,8 +28,22 @@ bool OpenGLClass::Initialize(HWND hwnd, int screenWidth, int screenHeight, float
     if (!m_window)
         return false;
     m_window->setSurfaceType(QSurface::SurfaceType::OpenGLSurface);
-    m_glContext->makeCurrent(m_window);
-    auto cleanup = qScopeGuard([this] { m_glContext->doneCurrent(); });
+    auto format = m_window->format();
+    // Turn on or off the vertical sync depending on the input bool value.
+    if (vsync)
+    {
+        format.setSwapInterval(1);
+        //glXSwapIntervalEXT(m_display, drawable, 1);
+    }
+    else
+    {
+        format.setSwapInterval(0);
+        //glXSwapIntervalEXT(m_display, drawable, 0);
+    }
+    m_window->setFormat(format);
+    if (!this->MakeCurrent())
+        return false;
+    auto cleanup = qScopeGuard([this] { this->DoneCurrent(); });
     initializeOpenGLFunctions();
 
     //GLXDrawable drawable;
@@ -78,6 +92,8 @@ bool OpenGLClass::Initialize(HWND hwnd, int screenWidth, int screenHeight, float
 	//glXSwapIntervalEXT(m_display, drawable, 0);
     }
 
+    this->glViewport(GLint(0), GLint(0), GLsizei(screenWidth), GLsizei(screenHeight));
+
     // Initialize the world/model matrix to the identity matrix.
     BuildIdentityMatrix(m_worldMatrix);
 
@@ -107,7 +123,8 @@ void OpenGLClass::Shutdown()
 
 void OpenGLClass::BeginScene(float red, float green, float blue, float alpha)
 {
-    m_glContext->makeCurrent(m_window);
+    if (!this->MakeCurrent())
+        return;
     // Set the color to clear the screen to.
     this->glClearColor(red, green, blue, alpha);
 
@@ -123,8 +140,18 @@ void OpenGLClass::EndScene()
     // Present the back buffer to the screen since rendering is complete.
     //glXSwapBuffers(m_display, m_hwnd);
     m_glContext->swapBuffers(m_window);
-    m_glContext->doneCurrent();
+    this->DoneCurrent();
     return;
+}
+
+bool OpenGLClass::MakeCurrent()
+{
+    return m_glContext->makeCurrent(m_window);
+}
+
+void OpenGLClass::DoneCurrent()
+{
+    m_glContext->doneCurrent();
 }
 
 

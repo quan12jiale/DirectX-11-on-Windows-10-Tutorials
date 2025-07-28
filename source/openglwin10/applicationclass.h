@@ -10,7 +10,9 @@
 // MY CLASS INCLUDES //
 ///////////////////////
 #include "openglclass.h"
-
+#include "colorshaderclass.h"
+#include "modelclass.h"
+#include "cameraclass.h"
 
 /////////////
 // GLOBALS //
@@ -40,6 +42,9 @@ private:
 
 private:
 	OpenGLClass* m_OpenGL;
+	ColorShaderClass* m_ColorShader;
+	ModelClass* m_Model;
+	CameraClass* m_Camera;
 };
 
 #endif

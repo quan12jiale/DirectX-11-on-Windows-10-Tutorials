@@ -9,7 +9,7 @@
 // INCLUDES //
 //////////////
 #include <QOpenGLContext>
-#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
 #include <QWindow>
 #include <string.h>
 #include <math.h>
@@ -18,7 +18,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Class Name: OpenGLClass
 ////////////////////////////////////////////////////////////////////////////////
-class OpenGLClass : protected QOpenGLFunctions
+class OpenGLClass : public QOpenGLExtraFunctions
 {
 public:
     OpenGLClass();
@@ -30,6 +30,8 @@ public:
 
     void BeginScene(float, float, float, float);
     void EndScene();
+    bool MakeCurrent();
+    void DoneCurrent();
 
     void BuildIdentityMatrix(float*);
     void BuildPerspectiveFovMatrix(float*, float, float, float, float);
