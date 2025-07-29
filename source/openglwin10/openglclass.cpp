@@ -43,8 +43,6 @@ bool OpenGLClass::Initialize(HWND hwnd, int screenWidth, int screenHeight, float
     m_window->setFormat(format);
     if (!this->MakeCurrent())
         return false;
-    auto cleanup = qScopeGuard([this] { this->DoneCurrent(); });
-    initializeOpenGLFunctions();
 
     //GLXDrawable drawable;
     float fieldOfView, screenAspect;
@@ -113,6 +111,7 @@ bool OpenGLClass::Initialize(HWND hwnd, int screenWidth, int screenHeight, float
 
 void OpenGLClass::Shutdown()
 {
+    this->DoneCurrent();
     delete m_glContext;
     m_glContext = nullptr;
     delete m_window;
@@ -123,8 +122,6 @@ void OpenGLClass::Shutdown()
 
 void OpenGLClass::BeginScene(float red, float green, float blue, float alpha)
 {
-    if (!this->MakeCurrent())
-        return;
     // Set the color to clear the screen to.
     this->glClearColor(red, green, blue, alpha);
 
@@ -140,7 +137,6 @@ void OpenGLClass::EndScene()
     // Present the back buffer to the screen since rendering is complete.
     //glXSwapBuffers(m_display, m_hwnd);
     m_glContext->swapBuffers(m_window);
-    this->DoneCurrent();
     return;
 }
 
@@ -151,7 +147,8 @@ bool OpenGLClass::MakeCurrent()
 
 void OpenGLClass::DoneCurrent()
 {
-    m_glContext->doneCurrent();
+    if (m_glContext)
+        m_glContext->doneCurrent();
 }
 
 
@@ -313,6 +310,7 @@ void OpenGLClass::GetOrthoMatrix(float* matrix)
 
 bool OpenGLClass::LoadExtensionList()
 {
+    initializeOpenGLFunctions();
     return true;
 }
 

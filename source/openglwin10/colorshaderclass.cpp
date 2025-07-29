@@ -34,10 +34,6 @@ bool ColorShaderClass::Initialize(OpenGLClass* OpenGL)
     strcpy(vsFilename, "../OpenglEngine/color.vs");
     strcpy(psFilename, "../OpenglEngine/color.ps");
 
-    if (!m_OpenGLPtr->MakeCurrent())
-        return false;
-    auto cleanup = qScopeGuard([this] { m_OpenGLPtr->DoneCurrent(); });
-
     // Initialize the vertex and pixel shaders.
     result = InitializeShader(vsFilename, psFilename);
     if(!result)
