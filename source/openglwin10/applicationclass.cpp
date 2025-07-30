@@ -10,6 +10,7 @@ ApplicationClass::ApplicationClass()
 	m_ColorShader = 0;
 	m_Model = 0;
 	m_Camera = 0;
+	m_TextureShader = 0;
 }
 
 
@@ -25,6 +26,7 @@ ApplicationClass::~ApplicationClass()
 
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
+	char textureFilename[128];
 	bool result;
 
 
@@ -38,29 +40,32 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	// Create and initialize the color shader object.
-	m_ColorShader = new ColorShaderClass;
-
-	result = m_ColorShader->Initialize(m_OpenGL);
-	if (!result)
-	{
-		cout << "Error: Could not initialize the color shader object." << endl;
-		return false;
-	}
-
 	// Create and initialize the camera object.
 	m_Camera = new CameraClass;
 
 	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
 	m_Camera->Render();
 
+	// Set the file name of the texture.
+	strcpy(textureFilename, "../Engine/data/stone01.tga");
+
 	// Create and initialize the model object.
 	m_Model = new ModelClass;
 
-	result = m_Model->Initialize(m_OpenGL);
+	result = m_Model->Initialize(m_OpenGL, textureFilename, false);
 	if (!result)
 	{
 		cout << "Error: Could not initialize the model object." << endl;
+		return false;
+	}
+
+	// Create and initialize the texture shader object.
+	m_TextureShader = new TextureShaderClass;
+
+	result = m_TextureShader->Initialize(m_OpenGL);
+	if (!result)
+	{
+		cout << "Error: Could not initialize the texture shader object." << endl;
 		return false;
 	}
 
@@ -70,6 +75,14 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 void ApplicationClass::Shutdown()
 {
+	// Release the texture shader object.
+	if (m_TextureShader)
+	{
+		m_TextureShader->Shutdown();
+		delete m_TextureShader;
+		m_TextureShader = 0;
+	}
+
 	// Release the model object.
 	if (m_Model)
 	{
@@ -135,12 +148,15 @@ bool ApplicationClass::Render()
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_OpenGL->GetProjectionMatrix(projectionMatrix);
 
-	// Set the color shader as the current shader program and set the matrices that it will use for rendering.
-	result = m_ColorShader->SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix);
+	// Set the texture shader as the current shader program and set the matrices that it will use for rendering.
+	result = m_TextureShader->SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix);
 	if (!result)
 	{
 		return false;
 	}
+
+	// Set the texture for the model in the pixel shader.
+	m_Model->SetTexture(0);
 
 	// Render the model.
 	m_Model->Render();
