@@ -24,6 +24,7 @@ public:
     OpenGLClass();
     OpenGLClass(const OpenGLClass&);
     ~OpenGLClass();
+    QOpenGLContext* GetGLContext() const;
 
     bool Initialize(HWND hwnd, int screenWidth, int screenHeight, float screenNear, float screenDepth, bool vsync);
     void Shutdown();

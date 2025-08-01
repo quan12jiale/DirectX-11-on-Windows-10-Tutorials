@@ -2,7 +2,7 @@
 // Filename: systemclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "systemclass.h"
-
+#include "01 Getting started/04 Hello Triangle/hello_triangle_indexed.h"
 
 SystemClass::SystemClass()
 {
@@ -40,7 +40,7 @@ bool SystemClass::Initialize()
 	m_Input->Initialize();
 
 	// Create and initialize the application class object.  This object will handle rendering all the graphics for this application.
-	m_Application = new ApplicationClass;
+	m_Application = new HelloTriangleIndexed;
 
 	result = m_Application->Initialize(screenWidth, screenHeight, m_hwnd);
 	if(!result)

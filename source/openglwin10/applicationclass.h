@@ -34,12 +34,15 @@ public:
 	ApplicationClass(const ApplicationClass&);
 	~ApplicationClass();
 
-	bool Initialize(int, int, HWND);
-	void Shutdown();
+	virtual bool Initialize(int, int, HWND);
+	virtual void Shutdown();
 	bool Frame();
-
+protected:
+	static GLuint compileShader(GLuint program, GLenum shaderStageType, const char* srcStr, OpenGLClass* m_OpenGL);
+	static bool checkCompileShaderError(GLuint shader, OpenGLClass* m_OpenGL);
+	static bool checkLinkProgramError(GLuint program, OpenGLClass* m_OpenGL);
 private:
-	bool Render();
+	virtual bool Render();
 
 private:
 	OpenGLClass* m_OpenGL;

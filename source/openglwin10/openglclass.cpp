@@ -21,6 +21,11 @@ OpenGLClass::~OpenGLClass()
     Shutdown();
 }
 
+QOpenGLContext* OpenGLClass::GetGLContext() const
+{
+    return m_glContext;
+}
+
 
 bool OpenGLClass::Initialize(HWND hwnd, int screenWidth, int screenHeight, float screenNear, float screenDepth, bool vsync)
 {
