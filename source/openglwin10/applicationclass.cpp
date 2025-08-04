@@ -10,7 +10,8 @@ ApplicationClass::ApplicationClass()
 	m_ColorShader = 0;
 	m_Model = 0;
 	m_Camera = 0;
-	m_TextureShader = 0;
+	m_LightShader = 0;
+	m_Light = 0;
 }
 
 
@@ -59,15 +60,21 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	// Create and initialize the texture shader object.
-	m_TextureShader = new TextureShaderClass;
+	// Create and initialize the light shader object.
+	m_LightShader = new LightShaderClass;
 
-	result = m_TextureShader->Initialize(m_OpenGL);
+	result = m_LightShader->Initialize(m_OpenGL);
 	if (!result)
 	{
-		cout << "Error: Could not initialize the texture shader object." << endl;
+		cout << "Error: Could not initialize the light shader object." << endl;
 		return false;
 	}
+	
+	// Create and initialize the light object.
+	m_Light = new LightClass;
+
+	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light->SetDirection(0.0f, 0.0f, 1.0f);
 
 	return true;
 }
@@ -75,12 +82,19 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 void ApplicationClass::Shutdown()
 {
-	// Release the texture shader object.
-	if (m_TextureShader)
+	// Release the light object.
+	if (m_Light)
 	{
-		m_TextureShader->Shutdown();
-		delete m_TextureShader;
-		m_TextureShader = 0;
+		delete m_Light;
+		m_Light = 0;
+	}
+
+	// Release the light shader object.
+	if (m_LightShader)
+	{
+		m_LightShader->Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
 	}
 
 	// Release the model object.
@@ -120,11 +134,18 @@ void ApplicationClass::Shutdown()
 
 bool ApplicationClass::Frame()
 {
+	static float rotation = 360.0f;
 	bool result;
 
+	// Update the rotation variable each frame.
+	rotation -= 0.0174532925f * 1.0f;
+	if (rotation <= 0.0f)
+	{
+		rotation += 360.0f;
+	}
 
 	// Render the graphics scene.
-	result = Render();
+	result = Render(rotation);
 	if(!result)
 	{
 		return false;
@@ -133,60 +154,11 @@ bool ApplicationClass::Frame()
 	return true;
 }
 
-GLuint ApplicationClass::compileShader(GLuint program, GLenum shaderStageType, const char* srcStr, OpenGLClass* m_OpenGL)
-{
-	GLuint shader = m_OpenGL->glCreateShader(shaderStageType);
-	m_OpenGL->glShaderSource(shader, 1, &srcStr, nullptr);
-	m_OpenGL->glCompileShader(shader);
-	if (!checkCompileShaderError(shader, m_OpenGL)) {
-		return shader;
-	}
-	m_OpenGL->glAttachShader(program, shader);
-	return shader;
-}
 
-bool ApplicationClass::checkCompileShaderError(GLuint shader, OpenGLClass* m_OpenGL)
-{
-	GLint compiled = 0;
-	m_OpenGL->glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-	if (compiled != GL_TRUE) {
-		GLint infoLogLength = 0;
-		m_OpenGL->glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
-		QByteArray log;
-		if (infoLogLength > 1) {
-			GLsizei length = 0;
-			log.resize(infoLogLength);
-			m_OpenGL->glGetShaderInfoLog(shader, infoLogLength, &length, log.data());
-		}
-		qWarning("Failed to compile shader: %s", log.constData());
-		return false;
-	}
-	return true;
-}
-
-bool ApplicationClass::checkLinkProgramError(GLuint program, OpenGLClass* m_OpenGL)
-{
-	GLint linked = 0;
-	m_OpenGL->glGetProgramiv(program, GL_LINK_STATUS, &linked);
-	if (linked != GL_TRUE) {
-		GLint infoLogLength = 0;
-		m_OpenGL->glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
-		QByteArray log;
-		if (infoLogLength > 1) {
-			GLsizei length = 0;
-			log.resize(infoLogLength);
-			m_OpenGL->glGetProgramInfoLog(program, infoLogLength, &length, log.data());
-		}
-		qWarning("Failed to link shader program: %s", log.constData());
-		return false;
-	}
-	return true;
-}
-
-
-bool ApplicationClass::Render()
+bool ApplicationClass::Render(float rotation)
 {
 	float worldMatrix[16], viewMatrix[16], projectionMatrix[16];
+	float diffuseLightColor[4], lightDirection[3];
 	bool result;
 
 
@@ -198,8 +170,15 @@ bool ApplicationClass::Render()
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_OpenGL->GetProjectionMatrix(projectionMatrix);
 
-	// Set the texture shader as the current shader program and set the matrices that it will use for rendering.
-	result = m_TextureShader->SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix);
+	// Rotate the world matrix by the rotation value so that the triangle will spin.
+	m_OpenGL->MatrixRotationY(worldMatrix, rotation);
+
+	// Get the light properties.
+	m_Light->GetDirection(lightDirection);
+	m_Light->GetDiffuseColor(diffuseLightColor);
+
+	// Set the light shader as the current shader program and set the matrices that it will use for rendering.
+	result = m_LightShader->SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix, lightDirection, diffuseLightColor);
 	if (!result)
 	{
 		return false;

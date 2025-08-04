@@ -4,7 +4,7 @@
 #ifndef _APPLICATIONCLASS_H_
 #define _APPLICATIONCLASS_H_
 
-#include <windows.h>
+#include <qt_windows.h>
 
 ///////////////////////
 // MY CLASS INCLUDES //
@@ -13,7 +13,8 @@
 #include "colorshaderclass.h"
 #include "modelclass.h"
 #include "cameraclass.h"
-#include "textureshaderclass.h"
+#include "lightshaderclass.h"
+#include "lightclass.h"
 
 /////////////
 // GLOBALS //
@@ -36,20 +37,18 @@ public:
 
 	virtual bool Initialize(int, int, HWND);
 	virtual void Shutdown();
-	bool Frame();
-protected:
-	static GLuint compileShader(GLuint program, GLenum shaderStageType, const char* srcStr, OpenGLClass* m_OpenGL);
-	static bool checkCompileShaderError(GLuint shader, OpenGLClass* m_OpenGL);
-	static bool checkLinkProgramError(GLuint program, OpenGLClass* m_OpenGL);
+	virtual bool Frame();
+
 private:
-	virtual bool Render();
+	bool Render(float rotation);
 
 private:
 	OpenGLClass* m_OpenGL;
 	ColorShaderClass* m_ColorShader;
 	ModelClass* m_Model;
 	CameraClass* m_Camera;
-	TextureShaderClass* m_TextureShader;
+	LightShaderClass* m_LightShader;
+	LightClass* m_Light;
 };
 
 #endif

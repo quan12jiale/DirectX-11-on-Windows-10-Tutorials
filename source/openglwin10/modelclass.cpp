@@ -94,23 +94,32 @@ bool ModelClass::InitializeBuffers()
     // Bottom left.
     vertices[0].x = -1.0f;  // Position.
     vertices[0].y = -1.0f;
-    vertices[0].z =  0.0f;
+    vertices[0].z = 0.0f;
     vertices[0].tu = 0.0f;  // Texture
     vertices[0].tv = 0.0f;
+    vertices[0].nx = 0.0f;  // Normal.
+    vertices[0].ny = 0.0f;
+    vertices[0].nz = -1.0f;
 
     // Top middle.
-    vertices[1].x =  0.0f;  // Position.
-    vertices[1].y =  1.0f;
-    vertices[1].z =  0.0f;
+    vertices[1].x = 0.0f;  // Position.
+    vertices[1].y = 1.0f;
+    vertices[1].z = 0.0f;
     vertices[1].tu = 0.5f;  // Texture
     vertices[1].tv = 1.0f;
+    vertices[1].nx = 0.0f;  // Normal.
+    vertices[1].ny = 0.0f;
+    vertices[1].nz = -1.0f;
 
     // Bottom right.
-    vertices[2].x =  1.0f;  // Position.
+    vertices[2].x = 1.0f;  // Position.
     vertices[2].y = -1.0f;
-    vertices[2].z =  0.0f;
+    vertices[2].z = 0.0f;
     vertices[2].tu = 1.0f;  // Texture
     vertices[2].tv = 0.0f;
+    vertices[2].nx = 0.0f;  // Normal.
+    vertices[2].ny = 0.0f;
+    vertices[2].nz = -1.0f;
 
     // Load the index array with data.
     indices[0] = 0;  // Bottom left.
@@ -133,12 +142,17 @@ bool ModelClass::InitializeBuffers()
     // Enable the two vertex array attributes.
     m_OpenGLPtr->glEnableVertexAttribArray(0);  // Vertex position.
     m_OpenGLPtr->glEnableVertexAttribArray(1);  // Texture coordinates.
+    m_OpenGLPtr->glEnableVertexAttribArray(2);  // Normals
 
     // Specify the location and format of the position portion of the vertex buffer.
     m_OpenGLPtr->glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(VertexType), 0);
 
     // Specify the location and format of the texture coordinates portion of the vertex buffer.
     m_OpenGLPtr->glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(VertexType), (unsigned char*)NULL + (3 * sizeof(float)));
+
+    // Specify the location and format of the normal vector portion of the vertex buffer.
+    const int nx_offset = offsetof(VertexType, nx);
+    m_OpenGLPtr->glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(VertexType), (unsigned char*)NULL + nx_offset);
 
     // Generate an ID for the index buffer.
     m_OpenGLPtr->glGenBuffers(1, &m_indexBufferId);
