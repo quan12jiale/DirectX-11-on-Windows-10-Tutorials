@@ -53,8 +53,6 @@ endif()
 ##设置预处理器定义
 target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE UNICODE QT_DLL QT_CORE_LIB QT_GUI_LIB QT_WIDGETS_LIB) # WIN32 QT_NO_DEBUG NDEBUG
 
-set(__QT_DEPLOY_TOOL "D:/Program/qt6/bin/windeployqt.exe")
-
 # 设置一个变量
 set(ENABLE_VLD FALSE) # TRUE FALSE
 
@@ -76,6 +74,15 @@ endif()
 if(ENABLE_QRHI)
     ##配置库依赖
     find_package(Qt6 COMPONENTS Core Gui REQUIRED)
+    add_custom_command( #设置生成事件>>生成后事件 参考cmake\linux\helpers.cmake。拷贝Resources文件夹;调用windeployqt部署qt的dll
+      TARGET ${LIBRARY_TARGET_NAME}
+      POST_BUILD
+      COMMAND
+        "${CMAKE_COMMAND}" -E copy_directory "${PROJECT_SOURCE_DIR}/OpenglEngine"
+        "${PROJECT_SOURCE_DIR}/../build/bin/${PROJECT_PLATFORM}/$<CONFIG>/../OpenglEngine"
+      COMMENT "Copy ${LIBRARY_TARGET_NAME} to binary directory"
+      VERBATIM
+    )
 else()
 endif()
 

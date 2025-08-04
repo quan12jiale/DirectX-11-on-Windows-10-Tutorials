@@ -1,4 +1,5 @@
 ﻿#include "01 Getting started/04 Hello Triangle/hello_triangle_indexed.h"
+#include "util.h"
 
 static const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
@@ -33,12 +34,12 @@ bool HelloTriangleIndexed::Initialize(int screenWidth, int screenHeight, HWND hw
 	shaderProgram = m_OpenGL->glCreateProgram();
 
 	// vertex shader
-	unsigned int vertexShader = compileShader(shaderProgram, GL_VERTEX_SHADER, vertexShaderSource, m_OpenGL);
+	unsigned int vertexShader = Util::compileShader(shaderProgram, GL_VERTEX_SHADER, vertexShaderSource, m_OpenGL);
 	// fragment shader
-	unsigned int fragmentShader = compileShader(shaderProgram, GL_FRAGMENT_SHADER, fragmentShaderSource, m_OpenGL);
+	unsigned int fragmentShader = Util::compileShader(shaderProgram, GL_FRAGMENT_SHADER, fragmentShaderSource, m_OpenGL);
 
 	m_OpenGL->glLinkProgram(shaderProgram);
-	if (!checkLinkProgramError(shaderProgram, m_OpenGL)) {
+	if (!Util::checkLinkProgramError(shaderProgram, m_OpenGL)) {
 		return false;
 	}
 
@@ -126,10 +127,10 @@ void HelloTriangleIndexed::Shutdown()
 	}
 }
 
-bool HelloTriangleIndexed::Render()
+bool HelloTriangleIndexed::Frame()
 {
 	// render
-	// ------
+	m_OpenGL->MakeCurrent();
 	m_OpenGL->glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 	GLboolean depthTestEnabled;

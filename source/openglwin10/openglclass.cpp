@@ -127,6 +127,9 @@ void OpenGLClass::Shutdown()
 
 void OpenGLClass::BeginScene(float red, float green, float blue, float alpha)
 {
+    // fix qWarning("QOpenGLContext::swapBuffers() called without corresponding makeCurrent()")
+    this->MakeCurrent();
+    
     // Set the color to clear the screen to.
     this->glClearColor(red, green, blue, alpha);
 

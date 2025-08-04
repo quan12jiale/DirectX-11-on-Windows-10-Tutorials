@@ -6,7 +6,7 @@ public:
 	 bool Initialize(int screenWidth, int screenHeight, HWND hwnd) override;
 	 void Shutdown() override;
 private:
-	bool Render() override;
+	bool Frame() override;
 private:
 	OpenGLClass* m_OpenGL;
 	unsigned int shaderProgram;
