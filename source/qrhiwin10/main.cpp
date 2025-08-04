@@ -1,7 +1,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename: main.cpp
 ////////////////////////////////////////////////////////////////////////////////
-#include "systemclass.h"
+#include <qt_windows.h>
+#ifdef ENABLE_QRHI
+#include <QGuiApplication>
+#include "MyRhiWindow.h"
+#endif
+#define USE_QT
 
 std::wstring getExecutablePath() {
 	wchar_t path[MAX_PATH];
@@ -30,6 +35,12 @@ std::wstring getCurrentDirectory() {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
 {
+#ifdef ENABLE_QRHI
+	// 构造QGuiApplication，因为QWindow::fromWinId(WId id) >> QGuiApplicationPrivate::platformIntegration()
+	int argc = __argc;
+	char** argv = __argv;
+	QGuiApplication app(argc, argv);
+#endif
 	bool result;
 
 	const std::wstring exeDir = getExecutableDirectory();
@@ -38,20 +49,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 		// 用于ColorShaderClass::InitializeShader函数调用D3DCompileFromFile可以正确获取到相对路径
 		result = ::SetCurrentDirectoryW(reinterpret_cast<const wchar_t*>(exeDir.data()));
 	}
+#ifdef USE_QT
+	QRhiHelper::InitParams initParams;
+	initParams.backend = QRhi::D3D11;
+	MyRhiWindow window(initParams);
+	window.setTitle("01-RhiWindow");
+	window.resize({ 800,600 });
+	window.show();
 
-	// Create the system object.
-	SystemClass* System = new SystemClass;
-
-	// Initialize and run the system object.
-	result = System->Initialize();
-	if (result)
-	{
-		System->Run();
-	}
-
-	// Shutdown and release the system object.
-	System->Shutdown();
-	delete System;
-	System = 0;
+	app.exec();
+#else
+#endif
 	return 0;
 }

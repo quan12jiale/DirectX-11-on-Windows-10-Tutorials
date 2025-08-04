@@ -75,7 +75,7 @@ endif()
 
 if(ENABLE_QRHI)
     ##配置库依赖
-    find_package(Qt6 COMPONENTS Core Gui GuiPrivate ShaderTools ShaderToolsPrivate REQUIRED)
+    find_package(Qt6 COMPONENTS Core Gui REQUIRED)
 else()
 endif()
 
@@ -96,5 +96,5 @@ target_link_libraries(${LIBRARY_TARGET_NAME}
         dxguid
         #d3d12
     ${VLD_LIB_PATH}
-    Qt::Core Qt::Gui Qt::GuiPrivate Qt::ShaderTools Qt::ShaderToolsPrivate
+    Qt::Core Qt::Gui
 )

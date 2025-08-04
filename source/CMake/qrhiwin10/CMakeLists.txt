@@ -1,5 +1,5 @@
 ##设置库名称
-set(LIBRARY_TARGET_NAME dx11win10)
+set(LIBRARY_TARGET_NAME qrhiwin10)
 
 ##查找所有头文件
 file(GLOB_RECURSE  ${LIBRARY_TARGET_NAME}_HEADER_FILES
@@ -51,7 +51,9 @@ endif()
 #set_target_properties(${LIBRARY_TARGET_NAME} PROPERTIES AUTOMOC ON)
 
 ##设置预处理器定义
-target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE UNICODE) # WIN32 QT_NO_DEBUG NDEBUG QT_DLL QT_CORE_LIB QT_GUI_LIB QT_WIDGETS_LIB
+target_compile_definitions(${LIBRARY_TARGET_NAME} PRIVATE UNICODE QT_DLL QT_CORE_LIB QT_GUI_LIB QT_WIDGETS_LIB) # WIN32 QT_NO_DEBUG NDEBUG
+
+set(__QT_DEPLOY_TOOL "D:/Program/qt6/bin/windeployqt.exe")
 
 # 设置一个变量
 set(ENABLE_VLD FALSE) # TRUE FALSE
@@ -72,9 +74,14 @@ else()
 endif()
 
 if(ENABLE_QRHI)
+    ##配置库依赖
+    find_package(Qt6 COMPONENTS Core Gui GuiPrivate ShaderTools ShaderToolsPrivate REQUIRED)
     add_custom_command( #设置生成事件>>生成后事件 参考cmake\linux\helpers.cmake。拷贝Resources文件夹;调用windeployqt部署qt的dll
       TARGET ${LIBRARY_TARGET_NAME}
       POST_BUILD
+      COMMAND
+        "${__QT_DEPLOY_TOOL}" "${LIBRARY_TARGET_NAME}.exe" WORKING_DIRECTORY
+        "${PROJECT_SOURCE_DIR}/../build/bin/${PROJECT_PLATFORM}/$<CONFIG>"
       COMMAND
         "${CMAKE_COMMAND}" -E copy_directory "${PROJECT_SOURCE_DIR}/Engine"
         "${PROJECT_SOURCE_DIR}/../build/bin/${PROJECT_PLATFORM}/$<CONFIG>/../Engine"
@@ -94,11 +101,7 @@ target_include_directories(
 )
 
 target_link_libraries(${LIBRARY_TARGET_NAME}
-    PRIVATE 
-        d3d11
-        dxgi
-        d3dcompiler
-        dxguid
-        #d3d12
+    PRIVATE
     ${VLD_LIB_PATH}
+    Qt::Core Qt::Gui Qt::GuiPrivate Qt::ShaderTools Qt::ShaderToolsPrivate
 )

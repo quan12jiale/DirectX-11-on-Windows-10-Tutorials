@@ -1,8 +1,10 @@
 #ifdef ENABLE_QRHI
 #include "MyRhiWindow.h"
-#include "applicationclass.h"
 #include <QFile>
 #include <QGuiApplication>
+
+const float SCREEN_DEPTH = 1000.0f;
+const float SCREEN_NEAR = 0.3f;
 
 MyRhiWindow::MyRhiWindow(QRhiHelper::InitParams inInitParams)
 	: QRhiWindow(inInitParams) 
@@ -201,7 +203,7 @@ bool MyRhiWindow::InitializeTexture()
 	mImage = QImage(m_targaData, m_width, m_height, QImage::Format_RGBA8888);
 	Q_ASSERT(!mImage.isNull());
 
-	mTexture.reset(mRhi->newTexture(QRhiTexture::RGBA8, mImage.size()));
+	mTexture.reset(mRhi->newTexture(QRhiTexture::RGBA8, mImage.size(), 1, QRhiTexture::MipMapped | QRhiTexture::UsedWithGenerateMips));
 	if (!mTexture->create())
 		return false;
 
@@ -293,6 +295,7 @@ void MyRhiWindow::RenderTexture()
 		batch->uploadStaticBuffer(m_vertexBuffer.get(), m_textureVertexData.data()); // m_textureVertexData.data() VertexData
 		batch->uploadStaticBuffer(m_indexBuffer.get(), m_indexData.data()); // m_indexData.data() IndexData
 		batch->uploadTexture(mTexture.get(), mImage);
+		batch->generateMips(mTexture.get());
 		//cmdBuffer->resourceUpdate(batch);
 	}
 	batch->updateDynamicBuffer(m_matrixBuffer.get(), 0, 64, world.constData());
