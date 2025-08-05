@@ -5,10 +5,10 @@ class DiffuseLightWindow : public MyRhiWindow {
 public:
 	using MyRhiWindow::MyRhiWindow;
 private:
-	void InitializeDiffuseLightVertexIndexData();
+	virtual void InitializeDiffuseLightVertexIndexData();
 	bool InitializeDiffuseLight();
 	void RenderDiffuseLight();
-private:
+protected:
 	struct DiffuseLightVertexType
 	{
 		XMFLOAT4 position;
