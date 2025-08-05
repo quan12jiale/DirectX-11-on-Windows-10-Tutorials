@@ -5,12 +5,12 @@ using namespace DirectX;
 
 #ifdef ENABLE_QRHI
 class MyRhiWindow : public QRhiWindow {
-private:
+protected:
 	QRhiSignal mSigInit;										//用于初始化的信号
 	QRhiSignal mSigSubmit;										//用于提交资源的信号
 	QScopedPointer<QRhiShaderResourceBindings> mShaderBindings;		//描述符集布局绑定
 	QScopedPointer<QRhiGraphicsPipeline> mPipeline;					//图形渲染管线
-private:
+protected:
 	struct VertexType
 	{
 		XMFLOAT4 position;
@@ -40,11 +40,11 @@ public:
 public:
 	MyRhiWindow(QRhiHelper::InitParams inInitParams);
 	~MyRhiWindow();
-private:
+protected:
 	void InitializeData();
 	void InitializeMatrix();
 	bool InitializeBuffers();
-private:
+protected:
 	void InitializeTextureVertexIndexData();
 	bool InitializeTexture();
 	void RenderTexture();

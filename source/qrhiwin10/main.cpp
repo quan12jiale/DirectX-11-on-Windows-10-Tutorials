@@ -6,7 +6,7 @@
 #include <QGuiApplication>
 #include "MyRhiWindow.h"
 #endif
-#define USE_QT
+#include "06DiffuseLightWindow.h"
 
 std::wstring getExecutablePath() {
 	wchar_t path[MAX_PATH];
@@ -49,16 +49,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 		// 用于ColorShaderClass::InitializeShader函数调用D3DCompileFromFile可以正确获取到相对路径
 		result = ::SetCurrentDirectoryW(reinterpret_cast<const wchar_t*>(exeDir.data()));
 	}
-#ifdef USE_QT
+
 	QRhiHelper::InitParams initParams;
 	initParams.backend = QRhi::D3D11;
-	MyRhiWindow window(initParams);
+	DiffuseLightWindow window(initParams);
 	window.setTitle("01-RhiWindow");
 	window.resize({ 800,600 });
 	window.show();
 
 	app.exec();
-#else
-#endif
+
 	return 0;
 }

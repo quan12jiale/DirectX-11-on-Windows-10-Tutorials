@@ -249,6 +249,8 @@ bool MyRhiWindow::InitializeTexture()
 	mPipeline->setSampleCount(mSwapChain->sampleCount());
 	mPipeline->setTopology(QRhiGraphicsPipeline::Topology::Triangles);
 	mPipeline->setPolygonMode(QRhiGraphicsPipeline::Fill);// Fill、Line
+	mPipeline->setCullMode(QRhiGraphicsPipeline::Back);  // 启用背面剔除
+	mPipeline->setFrontFace(QRhiGraphicsPipeline::CCW);   // 设置正面为逆时针
 
 	QShader vs = QRhiHelper::newShaderFromHlslFile(QShader::VertexStage, "../Engine/texture.vert");
 	Q_ASSERT(vs.isValid());
