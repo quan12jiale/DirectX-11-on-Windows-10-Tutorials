@@ -27,6 +27,7 @@ ApplicationClass::~ApplicationClass()
 
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
+	char modelFilename[128];
 	char textureFilename[128];
 	bool result;
 
@@ -47,13 +48,16 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
 	m_Camera->Render();
 
+	// Set the file name of the model.
+	strcpy(modelFilename, "../Engine/data/cube.txt");
+
 	// Set the file name of the texture.
 	strcpy(textureFilename, "../Engine/data/stone01.tga");
 
 	// Create and initialize the model object.
 	m_Model = new ModelClass;
 
-	result = m_Model->Initialize(m_OpenGL, textureFilename, false);
+	result = m_Model->Initialize(m_OpenGL, modelFilename, textureFilename, false);
 	if (!result)
 	{
 		cout << "Error: Could not initialize the model object." << endl;
@@ -138,7 +142,7 @@ bool ApplicationClass::Frame()
 	bool result;
 
 	// Update the rotation variable each frame.
-	rotation -= 0.0174532925f * 1.0f;
+	rotation -= 0.0174532925f * 0.25f;
 	if (rotation <= 0.0f)
 	{
 		rotation += 360.0f;

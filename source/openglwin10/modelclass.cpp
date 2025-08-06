@@ -8,6 +8,7 @@ ModelClass::ModelClass()
 {
     m_OpenGLPtr = 0;
     m_Texture = 0;
+    m_model = 0;
 }
 
 
@@ -21,13 +22,20 @@ ModelClass::~ModelClass()
 }
 
 
-bool ModelClass::Initialize(OpenGLClass* OpenGL, char* textureFilename, bool wrap)
+bool ModelClass::Initialize(OpenGLClass* OpenGL, char* modelFilename, char* textureFilename, bool wrap)
 {
     bool result;
 
 
     // Store a pointer to the OpenGL object.
     m_OpenGLPtr = OpenGL;
+
+    // Load in the model data.
+    result = LoadModel(modelFilename);
+    if (!result)
+    {
+        return false;
+    }
 
     // Initialize the vertex and index buffer that hold the geometry for the triangle.
 	result = InitializeBuffers();
@@ -55,6 +63,9 @@ void ModelClass::Shutdown()
     // Release the vertex and index buffers.
     ShutdownBuffers();
 
+    // Release the model data.
+    ReleaseModel();
+
     // Release the pointer to the OpenGL object.
     m_OpenGLPtr = 0;
 
@@ -75,13 +86,8 @@ bool ModelClass::InitializeBuffers()
 {
     VertexType* vertices;
     unsigned int* indices;
+    int i;
 
-
-    // Set the number of vertices in the vertex array.
-    m_vertexCount = 3;
-
-    // Set the number of indices in the index array.
-    m_indexCount = 3;
 
     // Create the vertex array.
     vertices = new VertexType[m_vertexCount];
@@ -89,42 +95,20 @@ bool ModelClass::InitializeBuffers()
     // Create the index array.
     indices = new unsigned int[m_indexCount];
 
-    // Load the vertex array with data.
+    // Load the vertex array and index array with data.
+    for (i = 0; i < m_vertexCount; i++)
+    {
+        vertices[i].x = m_model[i].x;
+        vertices[i].y = m_model[i].y;
+        vertices[i].z = m_model[i].z;
+        vertices[i].tu = m_model[i].tu;
+        vertices[i].tv = m_model[i].tv;
+        vertices[i].nx = m_model[i].nx;
+        vertices[i].ny = m_model[i].ny;
+        vertices[i].nz = m_model[i].nz;
 
-    // Bottom left.
-    vertices[0].x = -1.0f;  // Position.
-    vertices[0].y = -1.0f;
-    vertices[0].z = 0.0f;
-    vertices[0].tu = 0.0f;  // Texture
-    vertices[0].tv = 0.0f;
-    vertices[0].nx = 0.0f;  // Normal.
-    vertices[0].ny = 0.0f;
-    vertices[0].nz = -1.0f;
-
-    // Top middle.
-    vertices[1].x = 0.0f;  // Position.
-    vertices[1].y = 1.0f;
-    vertices[1].z = 0.0f;
-    vertices[1].tu = 0.5f;  // Texture
-    vertices[1].tv = 1.0f;
-    vertices[1].nx = 0.0f;  // Normal.
-    vertices[1].ny = 0.0f;
-    vertices[1].nz = -1.0f;
-
-    // Bottom right.
-    vertices[2].x = 1.0f;  // Position.
-    vertices[2].y = -1.0f;
-    vertices[2].z = 0.0f;
-    vertices[2].tu = 1.0f;  // Texture
-    vertices[2].tv = 0.0f;
-    vertices[2].nx = 0.0f;  // Normal.
-    vertices[2].ny = 0.0f;
-    vertices[2].nz = -1.0f;
-
-    // Load the index array with data.
-    indices[0] = 0;  // Bottom left.
-    indices[1] = 1;  // Top middle.
-    indices[2] = 2;  // Bottom right.
+        indices[i] = i;
+    }
 
     // Allocate an OpenGL vertex array object.
     m_OpenGLPtr->glGenVertexArrays(1, &m_vertexArrayId);
@@ -240,4 +224,75 @@ void ModelClass::SetTexture(unsigned int textureUnit)
     m_Texture->SetTexture(m_OpenGLPtr, textureUnit);
 
     return;
-} 
+}
+
+
+bool ModelClass::LoadModel(char* filename)
+{
+    ifstream fin;
+    char input;
+    int i;
+
+
+    // Open the model file.
+    fin.open(filename);
+
+    // If it could not open the file then exit.
+    if (fin.fail())
+    {
+        return false;
+    }
+
+    // Read up to the value of vertex count.
+    fin.get(input);
+    while (input != ':')
+    {
+        fin.get(input);
+    }
+
+    // Read in the vertex count.
+    fin >> m_vertexCount;
+
+    // Set the number of indices to be the same as the vertex count.
+    m_indexCount = m_vertexCount;
+
+    // Create the model using the vertex count that was read in.
+    m_model = new ModelType[m_vertexCount];
+
+    // Read up to the beginning of the data.
+    fin.get(input);
+    while (input != ':')
+    {
+        fin.get(input);
+    }
+    fin.get(input);
+    fin.get(input);
+
+    // Read in the vertex data.
+    for (i = 0; i < m_vertexCount; i++)
+    {
+        fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
+        fin >> m_model[i].tu >> m_model[i].tv;
+        fin >> m_model[i].nx >> m_model[i].ny >> m_model[i].nz;
+
+        // Invert the V coordinate to match the OpenGL texture coordinate system.
+        m_model[i].tv = 1.0f - m_model[i].tv;
+    }
+
+    // Close the model file.
+    fin.close();
+
+    return true;
+}
+
+
+void ModelClass::ReleaseModel()
+{
+    if (m_model)
+    {
+        delete[] m_model;
+        m_model = 0;
+    }
+
+    return;
+}

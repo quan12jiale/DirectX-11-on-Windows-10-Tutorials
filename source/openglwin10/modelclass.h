@@ -31,12 +31,19 @@ private:
         float nx, ny, nz;
     };
 
+    struct ModelType
+    {
+        float x, y, z;
+        float tu, tv;
+        float nx, ny, nz;
+    };
+
 public:
     ModelClass();
     ModelClass(const ModelClass&);
     ~ModelClass();
 
-    bool Initialize(OpenGLClass*, char*, bool);
+    bool Initialize(OpenGLClass*, char*, char*, bool);
     void Shutdown();
     void Render();
 
@@ -50,11 +57,15 @@ private:
     bool LoadTexture(char*, bool);
     void ReleaseTexture();
 
+    bool LoadModel(char*);
+    void ReleaseModel();
+
 private:
     OpenGLClass* m_OpenGLPtr;
     int m_vertexCount, m_indexCount;
     unsigned int m_vertexArrayId, m_vertexBufferId, m_indexBufferId;
     TextureClass* m_Texture;
+    ModelType* m_model;
 };
 
 #endif
