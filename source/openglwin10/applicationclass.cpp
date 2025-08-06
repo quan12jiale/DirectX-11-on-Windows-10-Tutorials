@@ -45,7 +45,7 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	// Create and initialize the camera object.
 	m_Camera = new CameraClass;
 
-	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
+	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
 	m_Camera->Render();
 
 	// Set the file name of the model.
@@ -161,7 +161,7 @@ bool ApplicationClass::Frame()
 
 bool ApplicationClass::Render(float rotation)
 {
-	float worldMatrix[16], viewMatrix[16], projectionMatrix[16];
+	float worldMatrix[16], viewMatrix[16], projectionMatrix[16], rotateMatrix[16], translateMatrix[16], scaleMatrix[16], srMatrix[16];
 	float diffuseLightColor[4], lightDirection[3];
 	bool result;
 
@@ -181,7 +181,34 @@ bool ApplicationClass::Render(float rotation)
 	m_Light->GetDirection(lightDirection);
 	m_Light->GetDiffuseColor(diffuseLightColor);
 
-	// Set the light shader as the current shader program and set the matrices that it will use for rendering.
+	m_OpenGL->MatrixRotationY(rotateMatrix, rotation);  // Build the rotation matrix.
+	m_OpenGL->MatrixTranslation(translateMatrix, -2.0f, 0.0f, 0.0f);  // Build the translation matrix.
+
+	// Multiply them together to create the final world transformation matrix.
+	m_OpenGL->MatrixMultiply(worldMatrix, rotateMatrix, translateMatrix);
+
+	// Set the light shader as the current shader program and set the matrices and light values that it will use for rendering.
+	result = m_LightShader->SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix, lightDirection, diffuseLightColor);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Set the texture for the model in the pixel shader.
+	m_Model->SetTexture(0);
+
+	// Render the model.
+	m_Model->Render();
+
+	m_OpenGL->MatrixScale(scaleMatrix, 0.5f, 0.5f, 0.5f);  // Build the scaling matrix.
+	m_OpenGL->MatrixRotationY(rotateMatrix, rotation);  // Build the rotation matrix.
+	m_OpenGL->MatrixTranslation(translateMatrix, 2.0f, 0.0f, 0.0f);  // Build the translation matrix.
+
+	// Multiply the scale, rotation, and translation matrices together to create the final world transformation matrix.
+	m_OpenGL->MatrixMultiply(srMatrix, scaleMatrix, rotateMatrix);
+	m_OpenGL->MatrixMultiply(worldMatrix, srMatrix, translateMatrix);
+
+	// Set the light shader as the current shader program and set the updated matrices and light values that it will use for rendering.
 	result = m_LightShader->SetShaderParameters(worldMatrix, viewMatrix, projectionMatrix, lightDirection, diffuseLightColor);
 	if (!result)
 	{
