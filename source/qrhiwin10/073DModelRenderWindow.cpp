@@ -2,15 +2,6 @@
 #include <fstream>
 using namespace std;
 
-ModelRenderWindow::ModelRenderWindow(QRhiHelper::InitParams inInitParams)
-	: DiffuseLightWindow(inInitParams)
-{
-	char modelFilename[128];
-	// Set the file name of the model.
-	strcpy_s(modelFilename, "../Engine/data/cube.txt");
-	LoadModel(modelFilename);
-}
-
 ModelRenderWindow::~ModelRenderWindow()
 {
 	ReleaseModel();
@@ -18,6 +9,11 @@ ModelRenderWindow::~ModelRenderWindow()
 
 void ModelRenderWindow::InitializeDiffuseLightVertexIndexData()
 {
+	char modelFilename[128];
+	// Set the file name of the model.
+	strcpy_s(modelFilename, "../Engine/data/cube.txt");
+	LoadModel(modelFilename);
+
 	// Create the vertex array.
 	m_diffuseLightVertexData.resize(m_vertexCount);
 

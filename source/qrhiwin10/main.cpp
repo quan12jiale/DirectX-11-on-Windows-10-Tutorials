@@ -8,6 +8,7 @@
 #endif
 #include "06DiffuseLightWindow.h"
 #include "073DModelRenderWindow.h"
+#include "09AmbientLightWindow.h"
 
 std::wstring getExecutablePath() {
 	wchar_t path[MAX_PATH];
@@ -53,7 +54,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 
 	QRhiHelper::InitParams initParams;
 	initParams.backend = QRhi::D3D11;
-	ModelRenderWindow window(initParams);
+	AmbientLightWindow window(initParams);
 	window.setTitle("01-RhiWindow");
 	window.resize({ 800,600 });
 	window.show();

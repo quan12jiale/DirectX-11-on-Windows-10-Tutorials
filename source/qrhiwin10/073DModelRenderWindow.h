@@ -10,13 +10,13 @@ private:
 		float nx, ny, nz;
 	};
 public:
-	ModelRenderWindow(QRhiHelper::InitParams inInitParams);
+	using DiffuseLightWindow::DiffuseLightWindow;
 	~ModelRenderWindow();
-private:
+protected:
 	void InitializeDiffuseLightVertexIndexData() override;
-private:
+protected:
 	bool LoadModel(char* filename);
 	void ReleaseModel();
-private:
+protected:
 	ModelType* m_model;
 };
