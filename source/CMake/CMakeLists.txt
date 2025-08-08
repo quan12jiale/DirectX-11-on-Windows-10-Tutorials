@@ -144,6 +144,7 @@ add_subdirectory(openglwin10)
 if(ENABLE_QRHI)
     add_subdirectory(qrhiwin10)
 endif()
+add_subdirectory(tinyrenderer)
 
 # 设置启动项
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT dx11win10)
