@@ -32,9 +32,7 @@ void viewport(const int x, const int y, const int w, const int h)
 保持X坐标不变
 翻转Y坐标（处理坐标系差异）
 Z坐标用于深度缓冲
-W分量设为
--z/f
-，为透视除法做准备
+W分量设为-z/f，为透视除法做准备
 */
 void projection(const double coeff)
 {
@@ -63,7 +61,7 @@ void lookat(const vec3 eye, const vec3 center, const vec3 up)
 		{0,0,0,1}} } 
 		* 
 		mat<4, 4>{ {{1, 0, 0, -eye.x},
-			{ 0,1, 0,  -eye.y },
+			{ 0, 1, 0, -eye.y },
 			{ 0, 0, 1, -eye.z },
 			{ 0, 0, 0, 1 }} };
 }

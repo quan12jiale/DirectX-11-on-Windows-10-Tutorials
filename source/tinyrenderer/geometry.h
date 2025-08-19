@@ -23,7 +23,7 @@ template<int n> vec<n> operator*(const vec<n>& lhs, const double rhs) {
 	vec<n> ret = lhs;
 	for (int i = 0; i < n; i++)
 	{
-		ret[i] /= rhs;
+		ret[i] *= rhs;
 	}
 	return ret;
 }
@@ -54,6 +54,13 @@ template<int n> vec<n> operator/(const vec<n>& lhs, const double rhs) {
 	}
 	return ret;
 }
+
+template<> struct vec<2> 
+{
+	double x = 0, y = 0;
+	double& operator[](const int i) { assert(i >= 0 && i < 2); return i ? y : x; }
+	double  operator[](const int i) const { assert(i >= 0 && i < 2); return i ? y : x; }
+};
 
 template<> struct vec<3> 
 {
