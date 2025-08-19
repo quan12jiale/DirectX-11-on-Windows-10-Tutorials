@@ -6,8 +6,6 @@
 
 OpenGLClass::OpenGLClass()
 {
-    m_glContext = new QOpenGLContext;
-    bool res = m_glContext->create();
 }
 
 
@@ -45,7 +43,15 @@ bool OpenGLClass::Initialize(HWND hwnd, int screenWidth, int screenHeight, float
         format.setSwapInterval(0);
         //glXSwapIntervalEXT(m_display, drawable, 0);
     }
+    format.setProfile(QSurfaceFormat::CoreProfile);
     m_window->setFormat(format);
+
+    // like QRhiGles2::create(QRhi::Flags flags)
+    m_glContext = new QOpenGLContext;
+    m_glContext->setFormat(format);
+    m_glContext->setScreen(m_window->screen());
+    if (!m_glContext->create())
+        return false;
     if (!this->MakeCurrent())
         return false;
 
@@ -113,6 +119,50 @@ bool OpenGLClass::Initialize(HWND hwnd, int screenWidth, int screenHeight, float
     return true;
 }
 
+bool OpenGLClass::Initialize2(HWND hwnd, int screenWidth, int screenHeight, float screenNear, float screenDepth, bool vsync)
+{
+    m_window = QWindow::fromWinId(reinterpret_cast<WId>(hwnd));
+    if (!m_window)
+        return false;
+    m_window->setSurfaceType(QSurface::SurfaceType::OpenGLSurface);
+    auto format = m_window->format();
+    // Turn on or off the vertical sync depending on the input bool value.
+    if (vsync)
+    {
+        format.setSwapInterval(1);
+    }
+    else
+    {
+        format.setSwapInterval(0);
+    }
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    m_window->setFormat(format);
+
+    // like QRhiGles2::create(QRhi::Flags flags)
+    m_glContext = new QOpenGLContext;
+    m_glContext->setFormat(format);
+    m_glContext->setScreen(m_window->screen());
+    if (!m_glContext->create())
+        return false;
+    if (!this->MakeCurrent())
+        return false;
+
+    bool result;
+
+    // Store the screen size.
+    m_screenWidth = screenWidth;
+    m_screenHeight = screenHeight;
+
+    // Load the OpenGL extensions that will be used by this program.
+    result = LoadExtensionList();
+    if (!result)
+    {
+        return false;
+    }
+
+    this->glViewport(GLint(0), GLint(0), GLsizei(screenWidth), GLsizei(screenHeight));
+    return true;
+}
 
 void OpenGLClass::Shutdown()
 {

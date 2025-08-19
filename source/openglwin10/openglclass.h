@@ -27,6 +27,7 @@ public:
     QOpenGLContext* GetGLContext() const;
 
     bool Initialize(HWND hwnd, int screenWidth, int screenHeight, float screenNear, float screenDepth, bool vsync);
+    bool Initialize2(HWND hwnd, int screenWidth, int screenHeight, float screenNear, float screenDepth, bool vsync);
     void Shutdown();
 
     void BeginScene(float, float, float, float);
