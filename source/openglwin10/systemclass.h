@@ -44,7 +44,7 @@ private:
 	bool Frame();
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
-
+	void sendTimerEvent(int timerId);// my_internal_proc(HWND hwnd, UINT message, WPARAM wp, LPARAM lp)函数中的WPARAM wp参数即是定时器ID
 private:
 	LPCWSTR m_applicationName;
 	HINSTANCE m_hinstance;
@@ -52,6 +52,7 @@ private:
 
 	InputClass* m_Input;
 	ApplicationClass* m_Application;
+	int m_timerId = -1;
 };
 
 

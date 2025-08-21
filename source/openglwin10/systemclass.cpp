@@ -2,7 +2,7 @@
 // Filename: systemclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "systemclass.h"
-#include "01 Getting started/04 Hello Triangle/hello_triangle_indexed.h"
+#include "learnopengl/1.getting_started/6.4.coordinate_systems_instanced/coordinate_systems_instanced.h"
 
 SystemClass::SystemClass()
 {
@@ -47,6 +47,10 @@ bool SystemClass::Initialize()
 	{
 		return false;
 	}
+
+	m_timerId = 1;
+	int interval = 5000;// ms
+	int ok = ::SetTimer(m_hwnd, m_timerId, interval, 0);
 	
 	return true;
 }
@@ -156,6 +160,12 @@ LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam
 		{
 			// If a key is released then send it to the input object so it can unset the state for that key.
 			m_Input->KeyUp((unsigned int)wparam);
+			return 0;
+		}
+
+		case WM_TIMER:
+		{
+			sendTimerEvent(wparam);
 			return 0;
 		}
 
@@ -275,6 +285,28 @@ void SystemClass::ShutdownWindows()
 	return;
 }
 
+void SystemClass::sendTimerEvent(int timerId)
+{
+	if (timerId != m_timerId) {
+		return;
+	}
+	// 调用QImage::convertToFormat函数会创建QThread，QThread会createEventDispatcher，创建internalHwnd。
+	// 如果FreeLibrary(L"CGEHDll64.dll")，会在QEventDispatcherWin32Private析构函数，DestroyWindow(internalHwnd);时会崩溃在CGEHDll64.dll。
+	// 因此先return。
+	return;
+	const std::vector<std::wstring> black_list = { L"CGEHDll64.dll" };
+	for (const auto& dllName : black_list) {
+		HMODULE hModule = GetModuleHandle(dllName.c_str());
+		if (hModule) {
+			if (FreeLibrary(hModule)) {
+				wprintf(L"Successfully unloaded: %s\n", dllName.c_str());
+			}
+			else {
+				wprintf(L"Failed to unload: %s\n", dllName.c_str());
+			}
+		}
+	}
+}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 {
