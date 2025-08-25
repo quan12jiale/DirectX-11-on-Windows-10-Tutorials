@@ -38,7 +38,7 @@ public:
 	virtual bool Initialize(int, int, HWND);
 	virtual void Shutdown();
 	virtual bool Frame();
-
+	virtual void SetMsg(const MSG& msg) {}
 private:
 	bool Render(float rotation);
 

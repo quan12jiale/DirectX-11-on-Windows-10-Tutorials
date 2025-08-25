@@ -41,7 +41,7 @@ public:
 	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 private:
-	bool Frame();
+	bool Frame(const MSG& msg);
 	void InitializeWindows(int&, int&);
 	void ShutdownWindows();
 	void sendTimerEvent(int timerId);// my_internal_proc(HWND hwnd, UINT message, WPARAM wp, LPARAM lp)函数中的WPARAM wp参数即是定时器ID

@@ -108,7 +108,7 @@ void SystemClass::Run()
 		else
 		{
 			// Otherwise do the frame processing.
-			result = Frame();
+			result = Frame(msg);
 			if(!result)
 			{
 				done = true;
@@ -121,7 +121,7 @@ void SystemClass::Run()
 }
 
 
-bool SystemClass::Frame()
+bool SystemClass::Frame(const MSG& msg)
 {
 	bool result;
 
@@ -133,6 +133,7 @@ bool SystemClass::Frame()
 	}
 
 	// Do the frame processing for the application object.
+	m_Application->SetMsg(msg);
 	result = m_Application->Frame();
 	if(!result)
 	{
