@@ -1,6 +1,5 @@
 #include "learnopengl/1.getting_started/5.1.transformations/transformations.h"
 #include "learnopengl/shader.h"
-#include <QDateTime>
 
 bool Transformations::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
@@ -121,7 +120,7 @@ bool Transformations::Initialize(int screenWidth, int screenHeight, HWND hwnd)
     // or set it via the texture class
     ourShader->setInt("texture2", 1);
 
-    init_timestamp = QDateTime::currentMSecsSinceEpoch();
+    elapsed_timer_.start();
     return true;
 }
 
@@ -158,8 +157,8 @@ bool Transformations::Frame()
     m_OpenGL->glBindTexture(GL_TEXTURE_2D, texture2);
 
     // create transformations
-    // Rotate 45 degrees in 1 second
-    float angle = (QDateTime::currentMSecsSinceEpoch() - init_timestamp) * 45.0f / 1000.0f;
+    // Rotate 1 radians in 1 second
+    float angle = qRadiansToDegrees(elapsed_timer_.elapsed() / 1000.0f);
     QMatrix4x4 transform;
     transform.translate(QVector3D(0.5f, -0.5f, 0.0f));
     transform.rotate(angle, QVector3D(0.0f, 0.0f, 1.0f));

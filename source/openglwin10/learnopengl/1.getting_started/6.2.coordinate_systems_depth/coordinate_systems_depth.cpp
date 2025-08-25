@@ -1,6 +1,5 @@
 #include "learnopengl/1.getting_started/6.2.coordinate_systems_depth/coordinate_systems_depth.h"
 #include "learnopengl/shader.h"
-#include <QDateTime>
 
 bool CoordinateSystemsDepth::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
@@ -151,7 +150,7 @@ bool CoordinateSystemsDepth::Initialize(int screenWidth, int screenHeight, HWND 
     // or set it via the texture class
     ourShader->setInt("texture1", 0);
     ourShader->setInt("texture2", 1);
-    init_timestamp = QDateTime::currentMSecsSinceEpoch();
+    elapsed_timer_.start();
     return true;
 }
 
@@ -190,8 +189,8 @@ bool CoordinateSystemsDepth::Frame()
     ourShader->use();
 
     // create transformations
-    // Rotate 45 degrees in 1 second
-    float angle = (QDateTime::currentMSecsSinceEpoch() - init_timestamp) * 45.0f / 1000.0f;
+    // Rotate 1 radians in 1 second
+    float angle = qRadiansToDegrees(elapsed_timer_.elapsed() / 1000.0f);
     QMatrix4x4 model;
     QMatrix4x4 view;
     QMatrix4x4 projection;

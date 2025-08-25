@@ -1,6 +1,7 @@
 #pragma once
 #include "applicationclass.h"
 #include <QVector3D>
+#include <QElapsedTimer>
 
 class Shader;
 // https://github.com/JoeyDeVries/LearnOpenGL/tree/master
@@ -17,5 +18,5 @@ private:
 	unsigned int instanceVBO;
 	unsigned int texture1, texture2;
 	QVector<QVector3D> cubePositions;
-	qint64 init_timestamp;
+	QElapsedTimer elapsed_timer_;
 };

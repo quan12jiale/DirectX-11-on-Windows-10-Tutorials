@@ -1,6 +1,5 @@
 #include "learnopengl/1.getting_started/7.1.camera_circle/camera_circle.h"
 #include "learnopengl/shader.h"
-#include <QDateTime>
 
 bool CameraCircle::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
@@ -203,7 +202,7 @@ bool CameraCircle::Initialize(int screenWidth, int screenHeight, HWND hwnd)
     projection.perspective(45.0f, (float)800 / (float)600, 0.1f, 100.0f);
     ourShader->setMat4("projection", projection);
 
-    init_timestamp = QDateTime::currentMSecsSinceEpoch();
+    elapsed_timer_.start();
     return true;
 }
 
@@ -243,9 +242,8 @@ bool CameraCircle::Frame()
     ourShader->use();
 
     // camera/view transformation
-    // Rotate 45 degrees in 1 second
-    float angle = (QDateTime::currentMSecsSinceEpoch() - init_timestamp) * 45.0f / 1000.0f;
-    angle = qDegreesToRadians(angle);
+    // Rotate 1 radians in 1 second
+    float angle = elapsed_timer_.elapsed() / 1000.0f;
     QMatrix4x4 view;
     float radius = 10.0f;
     float camX = static_cast<float>(sin(angle) * radius);
