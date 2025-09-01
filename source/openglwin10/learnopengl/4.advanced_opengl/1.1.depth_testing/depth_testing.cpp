@@ -117,8 +117,8 @@ bool DepthTesting::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
     // load textures
     // -------------
-    unsigned int cubeTexture = Util::loadTexture("resources/textures/marble.jpg", m_OpenGL);
-    unsigned int floorTexture = Util::loadTexture("resources/textures/metal.png", m_OpenGL);
+    cubeTexture = Util::loadTexture("resources/textures/marble.jpg", m_OpenGL);
+    floorTexture = Util::loadTexture("resources/textures/metal.png", m_OpenGL);
 
     // shader configuration
     // --------------------

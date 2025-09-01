@@ -84,6 +84,8 @@ if(ENABLE_QRHI)
       VERBATIM
     )
 else()
+	##配置库依赖
+    find_package(Qt5 COMPONENTS Core Gui REQUIRED)
 endif()
 
 

@@ -2,7 +2,6 @@
 // Filename: openglclass.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "openglclass.h"
-#include <QScopeGuard>
 
 OpenGLClass::OpenGLClass()
 {

@@ -117,7 +117,7 @@ bool CoordinateSystemsMultiple::Initialize(int screenWidth, int screenHeight, HW
         //unsigned char* data = stbi_load(FileSystem::getPath("resources/textures/container.jpg").c_str(), &width, &height, &nrChannels, 0);
     QImage image("resources/textures/container.jpg");
     if (!image.isNull()) {
-        image.mirror();//stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+        image = image.mirrored();//stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
         // QImage::Format_RGB32:The image is stored using a 32-bit RGB format (0xffRRGGBB).
         if (image.format() != QImage::Format_RGB888) {
             image = image.convertToFormat(QImage::Format_RGB888);
@@ -144,7 +144,7 @@ bool CoordinateSystemsMultiple::Initialize(int screenWidth, int screenHeight, HW
     //data = stbi_load(FileSystem::getPath("resources/textures/awesomeface.png").c_str(), &width, &height, &nrChannels, 0);
     QImage image2("resources/textures/awesomeface.png");
     if (!image2.isNull()) {
-        image2.mirror();
+        image2 = image2.mirrored();
         // QImage::Format_RGB32:The image is stored using a 32-bit RGB format (0xffRRGGBB).
         if (image2.format() != QImage::Format_RGBA8888) {
             image2 = image2.convertToFormat(QImage::Format_RGBA8888);

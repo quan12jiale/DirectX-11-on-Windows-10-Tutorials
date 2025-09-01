@@ -63,8 +63,8 @@ if(ENABLE_QRHI)
     message(STATUS "defined ENABLE_QRHI")
     # 添加宏定义
     add_definitions(-DENABLE_QRHI)
-    list(APPEND CMAKE_PREFIX_PATH ${QT_PREFIX_PATH})
 endif()
+list(APPEND CMAKE_PREFIX_PATH ${QT_PREFIX_PATH})
 
 ##源代码位置
 set(PROJECT_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../")
@@ -137,6 +137,10 @@ if(ENABLE_QRHI)
     # 依赖的包，要提前找
     find_package(Qt6Core REQUIRED )
     find_package(Qt6Gui REQUIRED )
+else()
+	# 依赖的包，要提前找
+	find_package(Qt5Core REQUIRED)
+	find_package(Qt5Gui REQUIRED)
 endif()
 
 add_subdirectory(dx11win10)
