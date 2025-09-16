@@ -73,7 +73,7 @@ endif()
 
 if(ENABLE_QRHI)
     ##配置库依赖
-    find_package(Qt6 COMPONENTS Core Gui REQUIRED)
+    find_package(Qt6 COMPONENTS Core Gui OpenGL REQUIRED)
     add_custom_command( #设置生成事件>>生成后事件 参考cmake\linux\helpers.cmake。拷贝Resources文件夹;调用windeployqt部署qt的dll
       TARGET ${LIBRARY_TARGET_NAME}
       POST_BUILD
@@ -97,13 +97,15 @@ target_include_directories(
     ${VLD_INCLUDE_PATH}
 )
 
-target_link_libraries(${LIBRARY_TARGET_NAME}
-    PRIVATE 
-        d3d11
-        dxgi
-        d3dcompiler
-        dxguid
-        #d3d12
-    ${VLD_LIB_PATH}
-    Qt::Core Qt::Gui
-)
+if(ENABLE_QRHI)
+    target_link_libraries(${LIBRARY_TARGET_NAME}
+        PRIVATE 
+        ${VLD_LIB_PATH}
+        Qt::Core Qt::Gui Qt::OpenGL
+    )
+else()
+    target_link_libraries(${LIBRARY_TARGET_NAME}
+        PRIVATE 
+        Qt5::Core Qt5::Gui
+    )
+endif()

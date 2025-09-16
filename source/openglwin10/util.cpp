@@ -1,7 +1,7 @@
 #include "util.h"
 #include <iostream>
 
-GLuint Util::compileShader(GLuint program, GLenum shaderStageType, const char* srcStr, OpenGLClass* m_OpenGL)
+GLuint Util::compileShader(GLuint program, GLenum shaderStageType, const char* srcStr, QOpenGLExtraFunctions* m_OpenGL)
 {
 	GLuint shader = m_OpenGL->glCreateShader(shaderStageType);
 	m_OpenGL->glShaderSource(shader, 1, &srcStr, nullptr);
@@ -13,7 +13,7 @@ GLuint Util::compileShader(GLuint program, GLenum shaderStageType, const char* s
 	return shader;
 }
 
-bool Util::checkCompileShaderError(GLuint shader, OpenGLClass* m_OpenGL)
+bool Util::checkCompileShaderError(GLuint shader, QOpenGLExtraFunctions* m_OpenGL)
 {
 	GLint compiled = 0;
 	m_OpenGL->glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
@@ -32,7 +32,7 @@ bool Util::checkCompileShaderError(GLuint shader, OpenGLClass* m_OpenGL)
 	return true;
 }
 
-bool Util::checkLinkProgramError(GLuint program, OpenGLClass* m_OpenGL)
+bool Util::checkLinkProgramError(GLuint program, QOpenGLExtraFunctions* m_OpenGL)
 {
 	GLint linked = 0;
 	m_OpenGL->glGetProgramiv(program, GL_LINK_STATUS, &linked);
@@ -51,7 +51,7 @@ bool Util::checkLinkProgramError(GLuint program, OpenGLClass* m_OpenGL)
 	return true;
 }
 
-unsigned int Util::loadTexture(const char const* path, OpenGLClass* m_OpenGL)
+unsigned int Util::loadTexture(const char const* path, QOpenGLExtraFunctions* m_OpenGL)
 {
 	unsigned int textureID;
 	m_OpenGL->glGenTextures(1, &textureID);

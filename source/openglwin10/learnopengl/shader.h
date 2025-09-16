@@ -2,7 +2,7 @@
 #define SHADER_H
 
 #include <QMatrix4x4>
-#include "openglclass.h"
+#include <QOpenGLExtraFunctions>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -11,11 +11,11 @@
 class Shader
 {
 public:
-    OpenGLClass* m_OpenGL;
+    QOpenGLExtraFunctions* m_OpenGL;
     unsigned int ID;
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
-    Shader(const char* vertexPath, const char* fragmentPath, OpenGLClass* openGL)
+    Shader(const char* vertexPath, const char* fragmentPath, QOpenGLExtraFunctions* openGL)
         : m_OpenGL(openGL)
     {
         // 1. retrieve the vertex/fragment source code from filePath
