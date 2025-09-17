@@ -3,6 +3,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "systemclass.h"
 #include <QGuiApplication>
+#include "learnopengl/4.advanced_opengl/2.stencil_testing/stencil_testing.h"
+
+#define ENABLE_OpenGLWindow
 
 std::wstring getExecutablePath() {
 	wchar_t path[MAX_PATH];
@@ -44,7 +47,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 		// 用于ColorShaderClass::InitializeShader函数调用D3DCompileFromFile可以正确获取到相对路径
 		result = ::SetCurrentDirectoryW(reinterpret_cast<const wchar_t*>(exeDir.data()));
 	}
-	
+#ifdef ENABLE_OpenGLWindow
+	StencilTesting window;
+	window.show();
+	app.exec();
+#else
 	// Create the system object.
 	SystemClass* System = new SystemClass;
 
@@ -59,6 +66,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	System->Shutdown();
 	delete System;
 	System = 0;
-
+#endif
 	return 0;
 }
