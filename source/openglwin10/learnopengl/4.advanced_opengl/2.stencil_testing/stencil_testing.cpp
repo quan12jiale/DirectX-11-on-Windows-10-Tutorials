@@ -266,6 +266,9 @@ void StencilTesting::keyPressEvent(QKeyEvent* ev)
 
 void StencilTesting::mouseMoveEvent(QMouseEvent* ev)
 {
+    if (!(ev->buttons() & Qt::LeftButton)) {
+        return;
+    }
     const QPointF localPos = ev->localPos();
     float xpos = localPos.x();
     float ypos = localPos.y();

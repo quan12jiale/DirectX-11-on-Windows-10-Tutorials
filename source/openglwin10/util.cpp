@@ -59,12 +59,22 @@ unsigned int Util::loadTexture(const char const* path, QOpenGLExtraFunctions* m_
 	QImage image(path);
 	if (!image.isNull())
 	{
-		if (image.format() != QImage::Format_RGB888) {
+		GLenum format;
+		if (image.format() == QImage::Format_RGB32) {
 			image = image.convertToFormat(QImage::Format_RGB888);
+			format = GL_RGB;
+		}
+		else if (image.format() == QImage::Format_ARGB32) {
+			image = image.convertToFormat(QImage::Format_RGBA8888);
+			format = GL_RGBA;
+		}
+		else
+		{
+			assert(false);
 		}
 
 		m_OpenGL->glBindTexture(GL_TEXTURE_2D, textureID);
-		m_OpenGL->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.constBits());
+		m_OpenGL->glTexImage2D(GL_TEXTURE_2D, 0, format, image.width(), image.height(), 0, format, GL_UNSIGNED_BYTE, image.constBits());
 		m_OpenGL->glGenerateMipmap(GL_TEXTURE_2D);
 
 		m_OpenGL->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

@@ -2,8 +2,9 @@
 // Filename: main.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "systemclass.h"
-#include <QGuiApplication>
+#include <QApplication>
 #include "learnopengl/4.advanced_opengl/2.stencil_testing/stencil_testing.h"
+#include "learnopengl/4.advanced_opengl/3.1.blending_discard/blending_discard.h"
 
 #define ENABLE_OpenGLWindow
 
@@ -37,7 +38,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	// 构造QGuiApplication，因为QWindow::fromWinId(WId id) >> QGuiApplicationPrivate::platformIntegration()
 	int argc = __argc;
 	char** argv = __argv;
-	QGuiApplication app(argc, argv);
+	QApplication app(argc, argv);
 
 	bool result;
 	
