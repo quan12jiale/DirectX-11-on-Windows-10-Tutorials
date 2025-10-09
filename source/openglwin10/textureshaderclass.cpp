@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "textureshaderclass.h"
 
+using namespace std;
 
 TextureShaderClass::TextureShaderClass()
 {

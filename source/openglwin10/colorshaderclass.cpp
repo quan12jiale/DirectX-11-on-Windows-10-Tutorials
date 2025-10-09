@@ -4,6 +4,8 @@
 #include "colorshaderclass.h"
 #include <QFile>
 
+using namespace std;
+
 ColorShaderClass::ColorShaderClass()
 {
     m_OpenGLPtr = 0;

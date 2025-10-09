@@ -4,6 +4,8 @@
 #include "lightshaderclass.h"
 #include "util.h"
 
+using namespace std;
+
 LightShaderClass::LightShaderClass()
 {
     m_OpenGLPtr = 0;
