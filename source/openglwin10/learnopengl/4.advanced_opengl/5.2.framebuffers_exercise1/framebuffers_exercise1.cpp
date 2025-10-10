@@ -1,14 +1,14 @@
-#include "learnopengl/4.advanced_opengl/5.1.framebuffers/framebuffers.h"
+#include "learnopengl/4.advanced_opengl/5.2.framebuffers_exercise1/framebuffers_exercise1.h"
 #include "learnopengl/shader.h"
 #include "util.h"
 #include <QKeyEvent>
 
-FrameBuffers::FrameBuffers()
+FrameBuffersExercise1::FrameBuffersExercise1()
     : camera(QVector3D(0.0f, 0.0f, 3.0f))
 {
 }
 
-FrameBuffers::~FrameBuffers()
+FrameBuffersExercise1::~FrameBuffersExercise1()
 {
     this->glDeleteVertexArrays(1, &cubeVAO);
     this->glDeleteVertexArrays(1, &planeVAO);
@@ -18,6 +18,11 @@ FrameBuffers::~FrameBuffers()
     this->glDeleteBuffers(1, &quadVBO);
     this->glDeleteRenderbuffers(1, &rbo);
     this->glDeleteFramebuffers(1, &framebuffer);
+    
+    // 清理纹理资源
+    this->glDeleteTextures(1, &cubeTexture);
+    this->glDeleteTextures(1, &floorTexture);
+    this->glDeleteTextures(1, &textureColorbuffer);
 
     if (shader) {
         delete shader;
@@ -29,7 +34,7 @@ FrameBuffers::~FrameBuffers()
     }
 }
 
-void FrameBuffers::initializeGL()
+void FrameBuffersExercise1::initializeGL()
 {
     this->resize(800, 600);
     this->setWindowTitle("LearnOpenGL");
@@ -42,8 +47,8 @@ void FrameBuffers::initializeGL()
 
     // build and compile shaders
     // -------------------------
-    shader = new Shader("5.1.framebuffers.vs", "5.1.framebuffers.fs", this);
-    screenShader = new Shader("5.1.framebuffers_screen.vs", "5.1.framebuffers_screen.fs", this);
+    shader = new Shader("5.2.framebuffers.vs", "5.2.framebuffers.fs", this);
+    screenShader = new Shader("5.2.framebuffers_screen.vs", "5.2.framebuffers_screen.fs", this);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -101,15 +106,16 @@ void FrameBuffers::initializeGL()
         -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
          5.0f, -0.5f, -5.0f,  2.0f, 2.0f
     };
-    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+    // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates. NOTE that this plane is now much smaller and at the top of the screen
+    float quadVertices[] = {
         // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
+        -0.3f,  1.0f,  0.0f, 1.0f,
+        -0.3f,  0.7f,  0.0f, 0.0f,
+         0.3f,  0.7f,  1.0f, 0.0f,
 
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
+        -0.3f,  1.0f,  0.0f, 1.0f,
+         0.3f,  0.7f,  1.0f, 0.0f,
+         0.3f,  1.0f,  1.0f, 1.0f
     };
     // cube VAO
     //unsigned int cubeVAO, cubeVBO;
@@ -167,7 +173,7 @@ void FrameBuffers::initializeGL()
     //unsigned int textureColorbuffer;
     this->glGenTextures(1, &textureColorbuffer);
     this->glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    this->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    this->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width(), this->height(), 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     this->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     this->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     this->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
@@ -175,7 +181,7 @@ void FrameBuffers::initializeGL()
     //unsigned int rbo;
     this->glGenRenderbuffers(1, &rbo);
     this->glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    this->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600); // use a single renderbuffer object for both a depth AND stencil buffer.
+    this->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, this->width(), this->height()); // use a single renderbuffer object for both a depth AND stencil buffer.
     this->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
     // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
     if (this->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -185,13 +191,13 @@ void FrameBuffers::initializeGL()
     elapsed_timer_.start();
 }
 
-void FrameBuffers::resizeGL(int w, int h)
+void FrameBuffersExercise1::resizeGL(int w, int h)
 {
     this->glViewport(0, 0, w, h);
     this->update();
 }
 
-void FrameBuffers::paintGL()
+void FrameBuffersExercise1::paintGL()
 {
     // per-frame time logic
     // --------------------
@@ -213,9 +219,13 @@ void FrameBuffers::paintGL()
 
     shader->use();
     QMatrix4x4 model;
+    camera.Yaw += 180.0f; // rotate the camera's yaw 180 degrees around
+    camera.ProcessMouseMovement(0, 0, false); // call this to make sure it updates its camera vectors, note that we disable pitch constrains for this specific case (otherwise we can't reverse camera's pitch values)
     QMatrix4x4 view = camera.GetViewMatrix();
+    camera.Yaw -= 180.0f; // reset it back to its original orientation
+    camera.ProcessMouseMovement(0, 0, true);
     QMatrix4x4 projection;
-    projection.perspective(camera.Zoom, (float)800 / (float)600, 0.1f, 100.0f);
+    projection.perspective(camera.Zoom, (float)this->width() / (float)this->height(), 0.1f, 100.0f);
     shader->setMat4("view", view);
     shader->setMat4("projection", projection);
     // cubes
@@ -238,18 +248,43 @@ void FrameBuffers::paintGL()
 
     // now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
     this->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    this->glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    this->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    model.setToIdentity();
+    view = camera.GetViewMatrix();
+    shader->setMat4("view", view);
+
+    // cubes
+    this->glBindVertexArray(cubeVAO);
+    this->glActiveTexture(GL_TEXTURE0);
+    this->glBindTexture(GL_TEXTURE_2D, cubeTexture);
+    model.translate(QVector3D(-1.0f, 0.0f, -1.0f));
+    shader->setMat4("model", model);
+    this->glDrawArrays(GL_TRIANGLES, 0, 36);
+    model.setToIdentity();
+    model.translate(QVector3D(2.0f, 0.0f, 0.0f));
+    shader->setMat4("model", model);
+    this->glDrawArrays(GL_TRIANGLES, 0, 36);
+    // floor
+    this->glBindVertexArray(planeVAO);
+    this->glBindTexture(GL_TEXTURE_2D, floorTexture);
+    shader->setMat4("model", QMatrix4x4());
+    this->glDrawArrays(GL_TRIANGLES, 0, 6);
+    this->glBindVertexArray(0);
+
+    // now draw the mirror quad with screen texture
+    // --------------------------------------------
     this->glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
-    // clear all relevant buffers
-    this->glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
-    this->glClear(GL_COLOR_BUFFER_BIT);
 
     screenShader->use();
     this->glBindVertexArray(quadVAO);
-    this->glBindTexture(GL_TEXTURE_2D, textureColorbuffer);	// use the color attachment texture as the texture of the quad plane
+    this->glBindTexture(GL_TEXTURE_2D, textureColorbuffer); // use the color attachment texture as the texture of the quad plane
     this->glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void FrameBuffers::keyPressEvent(QKeyEvent* ev)
+void FrameBuffersExercise1::keyPressEvent(QKeyEvent* ev)
 {
     switch (ev->key()) {
     case Qt::Key_W:
@@ -270,7 +305,7 @@ void FrameBuffers::keyPressEvent(QKeyEvent* ev)
     this->update();
 }
 
-void FrameBuffers::mouseMoveEvent(QMouseEvent* ev)
+void FrameBuffersExercise1::mouseMoveEvent(QMouseEvent* ev)
 {
     const QPointF localPos = ev->localPos();
     float xpos = localPos.x();
@@ -292,7 +327,7 @@ void FrameBuffers::mouseMoveEvent(QMouseEvent* ev)
     this->update();
 }
 
-void FrameBuffers::wheelEvent(QWheelEvent* ev)
+void FrameBuffersExercise1::wheelEvent(QWheelEvent* ev)
 {
     const QPoint angleDelta = ev->angleDelta();
     // 获取滚轮的偏移量
