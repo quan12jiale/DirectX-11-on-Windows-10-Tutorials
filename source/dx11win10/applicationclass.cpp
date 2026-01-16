@@ -11,6 +11,10 @@ ApplicationClass::ApplicationClass()
 	m_Model = 0;
 	m_LightShader = 0;
 	m_Light = 0;
+	m_VideoRenderer = 0;
+	m_IsVideoInitialized = false;
+	m_FrameCounter = 0;
+	m_TestFrameData = 0;
 }
 
 
@@ -82,12 +86,44 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Light->SetSpecularPower(32.0f);
 
+	// Create and initialize the video renderer
+	m_VideoRenderer = new VideoRendererClass;
+	if (!m_VideoRenderer)
+	{
+		return false;
+	}
+
+	result = m_VideoRenderer->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext());
+	if (!result)
+	{
+		return false;
+	}
+
+	// Initialize test video frame data (640x480 RGBA)
+	int frameSize = 640 * 480 * 4;
+	m_TestFrameData = new unsigned char[frameSize];
+	if (!m_TestFrameData)
+	{
+		return false;
+	}
+
+	// Initialize with test pattern
+	CreateTestFrameData(m_TestFrameData, 640, 480);
+	m_IsVideoInitialized = true;	
 	return true;
 }
 
 
 void ApplicationClass::Shutdown()
 {
+	// Release the video renderer object.
+	if (m_VideoRenderer)
+	{
+		m_VideoRenderer->Shutdown();
+		delete m_VideoRenderer;
+		m_VideoRenderer = 0;
+	}
+
 	// Release the light object.
 	if (m_Light)
 	{
@@ -126,7 +162,55 @@ void ApplicationClass::Shutdown()
 		m_Direct3D = 0;
 	}
 
+	// Release test frame data
+	if (m_TestFrameData)
+	{
+		delete[] m_TestFrameData;
+		m_TestFrameData = 0;
+	}
+
 	return;
+}
+
+
+void ApplicationClass::CreateTestFrameData(unsigned char* frameData, int width, int height)
+{
+	int frameSize = width * height * 4;
+
+	// Create a test pattern with moving colors
+	for (int i = 0; i < frameSize; i += 4)
+	{
+		int x = (i / 4) % width;
+		int y = (i / 4) / width;
+
+		// Create a gradient pattern
+		frameData[i] = (unsigned char)((x * 255) / width);     // Red channel
+		frameData[i + 1] = (unsigned char)((y * 255) / height); // Green channel
+		frameData[i + 2] = 128;                                // Blue channel
+		frameData[i + 3] = 255;                                // Alpha channel
+	}
+}
+
+
+void ApplicationClass::UpdateTestFrameData(unsigned char* frameData, int width, int height, int frameCounter)
+{
+	int frameSize = width * height * 4;
+
+	// Create an animated test pattern
+	for (int i = 0; i < frameSize; i += 4)
+	{
+		int x = (i / 4) % width;
+		int y = (i / 4) / width;
+
+		// Create moving wave pattern
+		float wave = sinf((float)x / 20.0f + frameCounter * 0.1f) * cosf((float)y / 20.0f + frameCounter * 0.1f);
+		float intensity = (wave + 1.0f) * 127.5f;
+
+		frameData[i] = (unsigned char)(intensity);     // Red channel
+		frameData[i + 1] = (unsigned char)(255 - intensity); // Green channel
+		frameData[i + 2] = (unsigned char)((x + y + frameCounter) % 256); // Blue channel
+		frameData[i + 3] = 255;                        // Alpha channel
+	}
 }
 
 
@@ -135,12 +219,23 @@ bool ApplicationClass::Frame()
 	static float rotation = 0.0f;
 	bool result;
 
-
 	// Update the rotation variable each frame.
 	rotation -= 0.0174532925f * 0.25f;
 	if (rotation < 0.0f)
 	{
 		rotation += 360.0f;
+	}
+
+	// Update video frame if video is initialized
+	if (m_IsVideoInitialized && m_VideoRenderer)
+	{
+		UpdateTestFrameData(m_TestFrameData, 640, 480, m_FrameCounter++);
+		
+		result = m_VideoRenderer->UpdateVideoFrame(m_Direct3D->GetDeviceContext(), m_TestFrameData, 640, 480);
+		if (!result)
+		{
+			return false;
+		}
 	}
 
 	// Render the graphics scene.
@@ -158,7 +253,6 @@ bool ApplicationClass::Render(float rotation)
 {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 	bool result;
-
 
 	// Clear the buffers to begin the scene.
 	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
@@ -181,9 +275,23 @@ bool ApplicationClass::Render(float rotation)
 	result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture(),
 								   m_Light->GetDirection(), m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(),
 								   m_Camera->GetPosition(), m_Light->GetSpecularColor(), m_Light->GetSpecularPower());
-	if(!result)
+	if (!result)
 	{
 		return false;
+	}
+
+	// Render the video frame if initialized
+	if (m_IsVideoInitialized && m_VideoRenderer)
+	{
+		// Create a simple transformation matrix for the video (no rotation, just position it in front of camera)
+		XMMATRIX videoWorldMatrix = XMMatrixIdentity();
+		
+		// Render the video frame
+		result = m_VideoRenderer->Render(m_Direct3D->GetDeviceContext(), videoWorldMatrix, viewMatrix, projectionMatrix);
+		if (!result)
+		{
+			return false;
+		}
 	}
 
 	// Present the rendered scene to the screen.

@@ -13,6 +13,7 @@
 #include "modelclass.h"
 #include "lightshaderclass.h"
 #include "lightclass.h"
+#include "videorendererclass.h"
 
 
 /////////////
@@ -40,13 +41,18 @@ public:
 
 private:
 	bool Render(float);
-
+	void CreateTestFrameData(unsigned char* frameData, int width, int height);
+	void UpdateTestFrameData(unsigned char* frameData, int width, int height, int frameCounter);
 private:
 	D3DClass* m_Direct3D;
 	CameraClass* m_Camera;
 	ModelClass* m_Model;
 	LightShaderClass* m_LightShader;
 	LightClass* m_Light;
+	VideoRendererClass* m_VideoRenderer;
+	bool m_IsVideoInitialized;
+	int m_FrameCounter;
+	unsigned char* m_TestFrameData;
 };
 
 #endif
